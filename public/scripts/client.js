@@ -2,7 +2,7 @@
 var debug = document.getElementById("debug");
 
 Physijs.scripts.worker = 'physijs_worker.js';
-//Physijs.scripts.ammo = '/js/ammo.js';
+Physijs.scripts.ammo = 'ammo.js';
 
 var scene, camera, renderer;
 var frameRate = 30;
@@ -65,7 +65,6 @@ function update() {
     }, 1000 / frameRate ); 
 }
 
-
 // Device Orientation
 var promise = FULLTILT.getDeviceOrientation({'type': 'world'});
 window.addEventListener("deviceorientation", function(event) {
@@ -84,14 +83,18 @@ window.addEventListener("deviceorientation", function(event) {
 // Player vector based on device orientation
 function calculatePlayerVector(deviceRotation, radius) {
 	// LATITUDE
-	var latitude = deviceRotation.beta * deg2Rad; // radians
-	if(deviceRotation.beta < 0) {
-		if(deviceRotation.beta > -90) {
+	var latitude = deviceRotation.beta;
+	/*if(latitude < 0) {
+		if(latitude > -90) {
 			latitude = camSettings.minLatitude;
 		} else {
 			latitude = camSettings.maxLatitude;
 		}
+	}*/
+	if(latitude < 0) {
+		latitude = 180 + (180 - Math.abs(latitude));
 	}
+	latitude *= deg2Rad; // latitude in radians
 	
 	// LONGITUDE
 	var alphaRad = deviceRotation.alpha * deg2Rad;
@@ -106,20 +109,26 @@ function calculatePlayerVector(deviceRotation, radius) {
 	var sinGamma = Math.sin(gammaRad);
 	
 	// Calculate A, B, C rotation components
-	var rotationAlpha = - cosAlpha * sinGamma - sinAlpha * sinBeta * cosGamma;
-	var rotationBeta = - sinAlpha * sinGamma + cosAlpha * sinBeta * cosGamma;
+	var rotationA = - cosAlpha * sinGamma - sinAlpha * sinBeta * cosGamma;
+	var rotationB = - sinAlpha * sinGamma + cosAlpha * sinBeta * cosGamma;
 	
 	//Calculate compass heading
-	var compassHeading = Math.atan(rotationAlpha / rotationBeta);
+	var compassHeading = Math.atan(rotationA / rotationB);
 	
 	//Convert from half unit circle to whole unit circle
-	if(rotationBeta < 0) {
+	if(rotationB < 0) {
 		compassHeading += Math.PI;
-	}else if(rotationAlpha < 0) {
+	}else if(rotationA < 0) {
 		compassHeading += 2 * Math.PI;
 	}
 	
-	var longitude = compassHeading; // Radians
+	var longitude = compassHeading; // longitude in radians
+	
+	// adjust control of camera rotation based on alpha(Z) rotation
+	latitude = lerp(latitude, longitude, Math.abs(Math.sin(orientation.alpha * deg2Rad)));
+	longitude = lerp(longitude, latitude, Math.abs(Math.cos(orientation.alpha * deg2Rad)));
+	
+	debug.innerHTML = "lon: " + Math.round(longitude * rad2Deg) + ", lat: " + Math.round(latitude * rad2Deg);
 	
 	// final player vector
 	var x = radius * Math.sin(latitude) * Math.cos(longitude);
@@ -137,3 +146,7 @@ function calculatePlayerVector(deviceRotation, radius) {
 	}
 	return value;
 }*/
+
+function lerp(value1, value2, alpha) {
+	return value1 + (value2 - value1) * alpha;
+}
