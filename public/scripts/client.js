@@ -1,39 +1,59 @@
-// Debugging
-var debug = document.getElementById("debug");
+'strict';
 
-Physijs.scripts.worker = 'physijs_worker.js';
-Physijs.scripts.ammo = 'ammo.js';
-
+// 
 var scene, camera, renderer;
 var frameRate = 30;
-var fieldOfView = 60;
-
-var deg2Rad = Math.PI / 180;
-var rad2Deg = 180 / Math.PI;
 var camSettings = {
+	fieldOfView: 60,
 	orbitRadius: 3,
-	position: new THREE.Vector3(),
-	rotationZ: 0,
-	minLatitude: 5,
-	maxLatitude: 175
+	cameraQuaternion: new THREE.Quaternion()
 };
+var deviceData = {};
 
 // Scene Objects
 var planet;
 
-window.onload = initialize;
+var setQuaternionRotation = function() {
+	var axisZ = new THREE.Vector3( 0, 0, 1 );
+	var euler = new THREE.Euler();
+	var q0 = new THREE.Quaternion();
+	var root2Over2 = Math.sqrt( 0.5 );
+	var q1 = new THREE.Quaternion( -root2Over2, 0, 0, root2Over2 ); // - PI/2 around the x-axis
+	return function(quaternion, alpha, beta, gamma, orientation) {
+		euler.set( beta, alpha, -gamma, 'YXZ' );                       		  // 'ZXY' for the device, but 'YXZ' for us
+		quaternion.setFromEuler( euler );                               	  // orient the device
+		quaternion.multiply( q1 );                                      	  // camera looks out the back of the device, not the top
+		quaternion.multiply( q0.setFromAxisAngle( axisZ, -orientation ) );    // adjust for screen orientation
+	};
+}();
+
 // called before start
 function initialize() {
+	Physijs.scripts.worker = 'physijs_worker.js';
+	Physijs.scripts.ammo = 'ammo.js';
 	scene = new Physijs.Scene();
-	camera = new THREE.PerspectiveCamera(fieldOfView, window.innerWidth / window.innerHeight, 0.1, 1000);
+	camera = new THREE.PerspectiveCamera(camSettings.fieldOfView, window.innerWidth / window.innerHeight, 0.1, 1000);
 	renderer = new THREE.WebGLRenderer();
 	renderer.setSize( window.innerWidth, window.innerHeight ); 
 	document.body.appendChild( renderer.domElement );
+	
+	window.addEventListener("resize", function() {
+		camera.aspect = window.innerWidth / window.innerHeight;
+		camera.updateProjectionMatrix();
+		renderer.setSize( window.innerWidth, window.innerHeight );
+	}, false);
+	
+	// Device orientation
+	window.addEventListener("deviceorientation", function(event) {
+		deviceData = event;
+	}, false);
+	
 	start();
-}
+} window.onload = initialize;
 
 // start of game
 function start() {
+	camera.position.z += camSettings.orbitRadius;
 	/*planet = new Physijs.SphereMesh(
 		new THREE.SphereGeometry(0.5, 24, 24),
 		new THREE.MeshNormalMaterial(),
@@ -43,7 +63,7 @@ function start() {
 		new THREE.BoxGeometry(1, 1, 1),
 		new THREE.MeshNormalMaterial(),
 		0
-	);
+	); 
 	scene.add( planet );
 	
 	// begin render loop
@@ -53,8 +73,16 @@ function start() {
 // Main Render Loop
 function update() {
 	// player orientation
-	camera.position.set( camSettings.position.x, camSettings.position.y, camSettings.position.z);
-	camera.lookAt(planet.position);
+	
+	var alpha = deviceData.alpha ? THREE.Math.degToRad( deviceData.alpha ) : 0; // Z
+	var beta = deviceData.beta ? THREE.Math.degToRad( deviceData.beta ) : 0; // X
+	var gamma = deviceData.gamma ? THREE.Math.degToRad( deviceData.gamma ) : 0; // Y
+	var orient = window.orientation ? THREE.Math.degToRad( window.orientation ) : 0; // O
+	var quaternion = new THREE.Quaternion();
+	setQuaternionRotation( quaternion, alpha, beta, gamma, orient );
+	setQuaternionRotation( camera.quaternion, alpha, beta, gamma, orient );
+	var pos = (new THREE.Vector3( 0, 0, camSettings.orbitRadius ) ).applyQuaternion( quaternion );
+	camera.position.set(pos.x, pos.y, pos.z);
 	
 	// render / physics frame calls
 	scene.simulate();
@@ -65,88 +93,9 @@ function update() {
     }, 1000 / frameRate ); 
 }
 
-// Device Orientation
-var promise = FULLTILT.getDeviceOrientation({'type': 'world'});
-window.addEventListener("deviceorientation", function(event) {
-	promise.then(function(deviceOrientation) {
-		// Use `deviceOrientation' object to interact with device orientation sensors
-		var deviceRotation = deviceOrientation.getScreenAdjustedEuler();
-		var newCamPos = calculatePlayerVector(deviceRotation, camSettings.orbitRadius);
-		camSettings.position.set(newCamPos.x, newCamPos.y, newCamPos.z);
-		
-	}).catch(function(message) {
-		// Device Orientation Events are not supported
-		console.log("This Device is not supported.");
-	});
-});
-
-// Player vector based on device orientation
-function calculatePlayerVector(deviceRotation, radius) {
-	// LATITUDE
-	var latitude = deviceRotation.beta;
-	/*if(latitude < 0) {
-		if(latitude > -90) {
-			latitude = camSettings.minLatitude;
-		} else {
-			latitude = camSettings.maxLatitude;
-		}
-	}*/
-	if(latitude < 0) {
-		latitude = 180 + (180 - Math.abs(latitude));
-	}
-	latitude *= deg2Rad; // latitude in radians
-	
-	// LONGITUDE
-	var alphaRad = deviceRotation.alpha * deg2Rad;
-	var betaRad = deviceRotation.beta * deg2Rad;
-	var gammaRad = deviceRotation.gamma * deg2Rad;
-	
-	// Calculate equation component
-	var cosAlpha = Math.cos(alphaRad);
-	var sinAlpha = Math.sin(alphaRad);
-	var sinBeta = Math.sin(betaRad);
-	var cosGamma = Math.cos(gammaRad);
-	var sinGamma = Math.sin(gammaRad);
-	
-	// Calculate A, B, C rotation components
-	var rotationA = - cosAlpha * sinGamma - sinAlpha * sinBeta * cosGamma;
-	var rotationB = - sinAlpha * sinGamma + cosAlpha * sinBeta * cosGamma;
-	
-	//Calculate compass heading
-	var compassHeading = Math.atan(rotationA / rotationB);
-	
-	//Convert from half unit circle to whole unit circle
-	if(rotationB < 0) {
-		compassHeading += Math.PI;
-	}else if(rotationA < 0) {
-		compassHeading += 2 * Math.PI;
-	}
-	
-	var longitude = compassHeading; // longitude in radians
-	
-	// adjust control of camera rotation based on alpha(Z) rotation
-	latitude = lerp(latitude, longitude, Math.abs(Math.sin(orientation.alpha * deg2Rad)));
-	longitude = lerp(longitude, latitude, Math.abs(Math.cos(orientation.alpha * deg2Rad)));
-	
-	debug.innerHTML = "lon: " + Math.round(longitude * rad2Deg) + ", lat: " + Math.round(latitude * rad2Deg);
-	
-	// final player vector
-	var x = radius * Math.sin(latitude) * Math.cos(longitude);
-	var y = radius * Math.cos(latitude);
-	var z = radius * Math.sin(latitude) * Math.sin(longitude);
-	
-	return new THREE.Vector3(x, y, z);
-}
-
-/*function clamp(value, min, max) {
-	if(value < min) {
-		value = min;
-	} else if(value > max) {
-		value = max;
-	}
-	return value;
-}*/
-
-function lerp(value1, value2, alpha) {
-	return value1 + (value2 - value1) * alpha;
+// Debugging
+var debugElement = document.getElementById("debug");
+function debug(stringValue) {
+	console.log(stringValue);
+	debugElement.innerHTML = stringValue;
 }
