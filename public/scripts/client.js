@@ -9,11 +9,13 @@ var camSettings = {
 	cameraQuaternion: new THREE.Quaternion()
 };
 var deviceData = {};
+var player = {};
+var opponent = {};
 
 // Scene Objects
 var planet;
 
-var setQuaternionRotation = function() {
+var setObjectRotation = function() {
 	var axisZ = new THREE.Vector3( 0, 0, 1 );
 	var euler = new THREE.Euler();
 	var q0 = new THREE.Quaternion();
@@ -53,6 +55,35 @@ function initialize() {
 
 // start of game
 function start() {
+	// Skybox
+	(function() {
+		var urlPrefix = "assets/textures/skybox/test/";
+		var cubeMapFaces = [
+			urlPrefix + "2.png",
+			urlPrefix + "3.png",
+			urlPrefix + "1.png",
+			urlPrefix + "6.png",
+			urlPrefix + "4.png",
+			urlPrefix + "5.png"
+		];
+		var textureCube = THREE.ImageUtils.loadTextureCube(cubeMapFaces);
+		var skyShader = THREE.ShaderLib[ "cube" ];
+		skyShader.uniforms[ "tCube" ].value = textureCube;
+		var cubeMapSize = 256;
+		var skyBox = new THREE.Mesh(
+			new THREE.BoxGeometry(cubeMapSize, cubeMapSize, cubeMapSize),
+			new THREE.ShaderMaterial({
+				vertexShader: skyShader.vertexShader,
+				fragmentShader: skyShader.fragmentShader,
+				uniforms: skyShader.uniforms,
+				depthWrite: false,
+				side: THREE.BackSide
+			})
+		);
+		scene.add( skyBox );
+	})();
+	
+	// Planet
 	camera.position.z += camSettings.orbitRadius;
 	/*planet = new Physijs.SphereMesh(
 		new THREE.SphereGeometry(0.5, 24, 24),
@@ -73,16 +104,15 @@ function start() {
 // Main Render Loop
 function update() {
 	// player orientation
-	
 	var alpha = deviceData.alpha ? THREE.Math.degToRad( deviceData.alpha ) : 0; // Z
 	var beta = deviceData.beta ? THREE.Math.degToRad( deviceData.beta ) : 0; // X
 	var gamma = deviceData.gamma ? THREE.Math.degToRad( deviceData.gamma ) : 0; // Y
 	var orient = window.orientation ? THREE.Math.degToRad( window.orientation ) : 0; // O
 	var quaternion = new THREE.Quaternion();
-	setQuaternionRotation( quaternion, alpha, beta, gamma, orient );
-	setQuaternionRotation( camera.quaternion, alpha, beta, gamma, orient );
+	setObjectRotation( quaternion, alpha, beta, gamma, orient );
 	var pos = (new THREE.Vector3( 0, 0, camSettings.orbitRadius ) ).applyQuaternion( quaternion );
 	camera.position.set(pos.x, pos.y, pos.z);
+	setObjectRotation( camera.quaternion, alpha, beta, gamma, orient );
 	
 	// render / physics frame calls
 	scene.simulate();
