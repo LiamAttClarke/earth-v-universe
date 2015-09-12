@@ -1,0 +1,42 @@
+BODY {
+	margin: 0;
+	font-family: sans-serif;
+	color: #ffffff;
+}
+#opponent-name {
+	display: inline-block;
+	position: fixed;
+	top: 4px;
+	left: 4px;
+	padding: 6px;
+	background-color: #000000;
+	opacity: 0.6;
+}
+#main-menu {
+	position: fixed;
+	bottom: 0;
+	width: 100%;
+	z-index: 10;
+}
+.input {
+	height: 30px;
+	text-align: center;
+	font-size: 1.5em;
+	padding: 12px;
+}
+.input-text {
+	width: calc(100% - 12px);
+	background-color: #000000;
+	border-radius: 0;
+	border: none;
+	color: #ffffff;	
+	opacity: 0.6;
+}
+.input-btn {
+	padding: 12px;
+	background-color: #ffffff;
+	color: #000000;
+}
+.no-show {
+	display: none !important;
+}
