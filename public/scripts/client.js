@@ -57,10 +57,7 @@
 		
 		// P2P connection
 		socket = io();
-		p2p = new P2P(socket, { numClients: 2 });
-		p2p.on('peer-msg', function (data) {
-			console.log(data);
-		});
+		p2p = new P2P(socket, { numClients: 1 });
 		
 		// start game
 		start();
