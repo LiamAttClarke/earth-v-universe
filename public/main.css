@@ -40,3 +40,8 @@ BODY {
 .no-show {
 	display: none !important;
 }
+#debug {
+	color: #ff0000;
+	position: fixed;
+	font-size: 2em;
+}
