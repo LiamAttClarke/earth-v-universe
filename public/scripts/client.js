@@ -3,19 +3,21 @@
 (function() {
 	// Dependencies
 	var THREE = require("three");
-	var Physijs = require("physijs");
-	var THREE = require("three");
-	var THREE = require("three");
-	var THREE = require("three");
+	var Physijs = require('physijs-browserify')(THREE);
+	var io = require("socket.io-client");
+	var P2P = require("socket.io-p2p");
+	Physijs.scripts.worker = '/libs/physi-worker.js';
+	Physijs.scripts.ammo = '/libs/ammo.js';
 	
 	var scene, camera, renderer;
-	var frameRate = 30;
-	var camSettings = {
+	var settings = {
+		frameRate: 30,
 		fieldOfView: 60,
-		orbitRadius: 3,
-		cameraQuaternion: new THREE.Quaternion()
+		orbitRadius: 3
 	};
+	var playerQuaternion = new THREE.Quaternion()
 	var deviceData = {};
+	var socket, p2p;
 	
 	// Scene Objects
 	var planet;
@@ -36,10 +38,8 @@
 	
 	// called before start
 	function initialize() {
-		Physijs.scripts.worker = 'physijs_worker.js';
-		Physijs.scripts.ammo = 'ammo.js';
 		scene = new Physijs.Scene();
-		camera = new THREE.PerspectiveCamera(camSettings.fieldOfView, window.innerWidth / window.innerHeight, 0.1, 1000);
+		camera = new THREE.PerspectiveCamera(settings.fieldOfView, window.innerWidth / window.innerHeight, 0.1, 1000);
 		renderer = new THREE.WebGLRenderer();
 		renderer.setSize( window.innerWidth, window.innerHeight ); 
 		document.body.appendChild( renderer.domElement );
@@ -56,12 +56,13 @@
 		}, false);
 		
 		// P2P connection
-		var socket = io();
-		var p2p = new P2P(socket, { numClients: 2 });
+		socket = io();
+		p2p = new P2P(socket, { numClients: 2 });
 		p2p.on('peer-msg', function (data) {
 			console.log(data);
 		});
 		
+		// start game
 		start();
 	} window.onload = initialize;
 	
@@ -96,7 +97,7 @@
 		})();
 		
 		// Planet
-		camera.position.z += camSettings.orbitRadius;
+		camera.position.z += settings.orbitRadius;
 		/*planet = new Physijs.SphereMesh(
 			new THREE.SphereGeometry(0.5, 24, 24),
 			new THREE.MeshNormalMaterial(),
@@ -120,9 +121,8 @@
 		var beta = deviceData.beta ? THREE.Math.degToRad( deviceData.beta ) : 0; // X
 		var gamma = deviceData.gamma ? THREE.Math.degToRad( deviceData.gamma ) : 0; // Y
 		var orient = window.orientation ? THREE.Math.degToRad( window.orientation ) : 0; // O
-		var quaternion = new THREE.Quaternion();
-		setObjectRotation( quaternion, alpha, beta, gamma, orient );
-		var pos = (new THREE.Vector3( 0, 0, camSettings.orbitRadius ) ).applyQuaternion( quaternion );
+		setObjectRotation( playerQuaternion, alpha, beta, gamma, orient );
+		var pos = (new THREE.Vector3( 0, 0, settings.orbitRadius ) ).applyQuaternion( playerQuaternion );
 		camera.position.set(pos.x, pos.y, pos.z);
 		setObjectRotation( camera.quaternion, alpha, beta, gamma, orient );
 		
@@ -132,7 +132,7 @@
 		// limit framerate
 		setTimeout( function() {
 			requestAnimationFrame( update );
-		}, 1000 / frameRate ); 
+		}, 1000 / settings.frameRate ); 
 	}
 	
 	// Debugging
