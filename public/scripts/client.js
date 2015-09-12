@@ -15,7 +15,7 @@
 	var settings = {
 		frameRate: 30,
 		fieldOfView: 60,
-		cameraOrbitRadius: 3
+		cameraOrbitRadius: 5
 	};
 	
 	// GUI
@@ -39,14 +39,12 @@
 	
 	playBtn.addEventListener("click", initGame);
 	
-	window.onload = initApp;
 	// called before start
-	function initApp() {
+	function initialize() {
 		// init Scene
 		scene = new Physijs.Scene();
 		// init Camera
 		camera = new THREE.PerspectiveCamera(settings.fieldOfView, window.innerWidth / window.innerHeight, 0.1, 1000);
-		camera.position.z += settings.cameraOrbitRadius;
 		// init Renderer
 		renderer = new THREE.WebGLRenderer();
 		renderer.setSize( window.innerWidth, window.innerHeight ); 
@@ -70,7 +68,7 @@
 		
 		// initialize main menu
 		initMenu();
-	}
+	} window.onload = initialize;
 	
 	/*-------------------
 		MENU SCENE
@@ -89,6 +87,7 @@
 	-------------------*/
 	
 	function initGame() {
+		playBtn.removeEventListener("click", initGame);
 		// Planet
 		/*planet = new Physijs.SphereMesh(
 			new THREE.SphereGeometry(0.5, 24, 24),
@@ -101,7 +100,7 @@
 			new THREE.MeshNormalMaterial(),
 			0
 		); 
-		scene.add( planet );	
+		scene.add( planet );
 	}
 	
 	/*----------------------
@@ -141,7 +140,7 @@
 		var gamma = deviceData.gamma ? THREE.Math.degToRad( deviceData.gamma ) : 0; // Y
 		var orient = window.orientation ? THREE.Math.degToRad( window.orientation ) : 0; // O
 		setObjectRotation( playerQuaternion, alpha, beta, gamma, orient );
-		var pos = (new THREE.Vector3( 0, 0, settings.orbitRadius ) ).applyQuaternion( playerQuaternion );
+		var pos = (new THREE.Vector3( 0, 0, settings.cameraOrbitRadius ) ).applyQuaternion( playerQuaternion );
 		camera.position.set(pos.x, pos.y, pos.z);
 		setObjectRotation( camera.quaternion, alpha, beta, gamma, orient );
 	}
@@ -159,7 +158,7 @@
 		var textureCube = THREE.ImageUtils.loadTextureCube(cubeMapFaces);
 		var skyShader = THREE.ShaderLib[ "cube" ];
 		skyShader.uniforms[ "tCube" ].value = textureCube;
-		var cubeMapSize = 256;
+		var cubeMapSize = 128;
 		var skyBox = new THREE.Mesh(
 			new THREE.BoxGeometry(cubeMapSize, cubeMapSize, cubeMapSize),
 			new THREE.ShaderMaterial({
