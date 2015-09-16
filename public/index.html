@@ -1,17 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
+<head>
+	<title>earth v UNIVERSE</title>
+	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/>
 	<link rel="stylesheet" text="text/css" href="main.css"/>
-<head>
-	<meta charset="UTF-8">
-	<title>earth v UNIVERSE</title>
+	<link href="assets"/>
 </head>
 <body>
-	<div id="main-menu"><!--
-		--><input id="input-name" class="input input-text" type="text" placeholder="NAME" maxlength="16" style="text-transform:uppercase"/><!--
-		--><div id="play-btn" class="input input-btn">START</div>
+	<div id="main-panel" class="panel">
+		<div id="main-menu">
+			<input id="input-name" class="input input-text" type="text" placeholder="NAME" maxlength="16" style="text-transform:uppercase"/>
+			<div id="play-btn" class="input input-btn">START</div>
+		</div>
 	</div>
-	<div id="opponent-name" class="no-show">Liam</div>	
+	<div id="ingame-panel" class="panel">
+		<div id="opponent-name" class="no-show">Liam</div>
+	</div>
 	<div id="debug"></div>
 </body>
 <script src="scripts/bundle.js"></script>

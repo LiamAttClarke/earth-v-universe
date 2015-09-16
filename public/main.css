@@ -12,11 +12,20 @@ BODY {
 	background-color: #000000;
 	opacity: 0.6;
 }
+#main-panel {
+	display: default;
+}
 #main-menu {
-	position: fixed;
+	position: absolute;
 	bottom: 0;
+}
+#ingame-panel {
+	display: none;
+}
+.panel {
+	position: fixed;
 	width: 100%;
-	z-index: 10;
+	height: 100%;
 }
 .input {
 	height: 30px;
@@ -25,7 +34,7 @@ BODY {
 	padding: 12px;
 }
 .input-text {
-	width: calc(100% - 12px);
+	width: calc(100vw - 24px);
 	background-color: #000000;
 	border-radius: 0;
 	border: none;
@@ -33,7 +42,7 @@ BODY {
 	opacity: 0.6;
 }
 .input-btn {
-	padding: 12px;
+	width: calc(100vw - 24px);
 	background-color: #ffffff;
 	color: #000000;
 }

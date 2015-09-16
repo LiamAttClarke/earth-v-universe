@@ -1,40 +1,64 @@
-var express = require("express");
+var express = require('express');
 var app = express();
-var server = require("http").createServer(app);
-var io = require("socket.io")(server);
-var p2p = require('socket.io-p2p-server').Server;
-io.use(p2p);
+var server = require('http').Server(app);
+var io = require('socket.io')(server);
 var port = 1337;
 
 //set static folder for application
-app.use(express.static("public"));
+app.use(express.static('public'));
 
 // serve application
 app.get("/", function(request, response) {
-	response.sendFile(__dirname + "/index.html");
+	response.sendFile(__dirname + '/index.html');
 });
 
 // open port 1337 for communication
 server.listen(1337, function() {
-	console.log("Listening on port %s", port);
+	console.log('Listening on port %d', port);
 });
 
+var rooms = [];
+var roomCounter = 0;
 function Room(id) {
-	this.id = id;
+	this.name = 'room' + roomCounter++;
 	this.players = [id];
 }
-var rooms = [];
 
 // new connection event
-io.sockets.on("connection", function(socket) {
-	console.log(socket.id + " - connected");
-	var room = joinOrCreateRoom(socket.id);
-	socket.join(room.id);
-	
+io.sockets.on('connection', function(socket) {
+	console.log(socket.id + ' - connected');
+	var room;
 	// connection lost event
-	socket.on( "disconnect", function() {
-		console.log(socket.id + " - disconnected");
-		leaveRoom(socket, room);
+	socket.on('disconnect', function() {
+		console.log(socket.id + ' - disconnected');
+		if(room) leaveRoom(socket, room);
+		if(rooms.length > 0) {
+			if(rooms[rooms.length - 1].players.length === 0) {
+				rooms.pop();
+				roomCounter--;
+			}
+		}
+	});
+	// user requests matchmaking
+	socket.on('find-match', function() {
+		console.log(socket.id + ' - started game');
+		room = joinOrCreateRoom(socket.id);
+		socket.join(room.name);
+		socket.emit('start-match');
+		// set host of match
+		if(room.players[0] === socket.id) {
+			socket.emit('init-match', { isHost: true });
+			socket.broadcast.to(room.name).emit('init-match', { isHost: false });
+		} else {
+			socket.emit('init-match', { isHost: false });
+			socket.broadcast.to(room.name).emit('init-match', { isHost: true });
+		}
+		console.log(socket.id + ' - ' + room.name);
+		console.log('Room Count = ' + rooms.length);
+		// emit simulation frames to all non-host players in room
+		socket.on('simulation-frame', function(data) {
+			socket.broadcast.to(room.name).emit('simulation-frame', data);
+		});
 	});
 });
 
@@ -52,9 +76,6 @@ function joinOrCreateRoom(clientId) {
 
 // remove socket from room then remove room if empty
 function leaveRoom(socket, room) {
-	socket.leave(room.id);
+	socket.leave(room.name);
 	room.players.splice(room.players.indexOf(socket.id), 1);
-	if(room.players.length === 0) {
-		rooms.splice(rooms.indexOf(room), 1);
-	}
 }
