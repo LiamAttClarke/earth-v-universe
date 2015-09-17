@@ -46,18 +46,17 @@ io.sockets.on('connection', function(socket) {
 		room = joinOrCreateRoom(socket.id);
 		socket.join(room.name);
 		// set host of match
-		if(room.players[0] === socket.id) {
-			socket.emit('init-match', { isHost: true });
-			socket.broadcast.to(room.name).emit('init-match', { isHost: false });
-		} else {
-			socket.emit('init-match', { isHost: false });
-			socket.broadcast.to(room.name).emit('init-match', { isHost: true });
-		}
 		console.log(socket.id + ' - ' + room.name);
 		console.log('Room Count = ' + rooms.length);
 		if(room.players.length === 2) {
 			// start match
-			io.broadcast.to(room.name).emit('start-match');
+			if(room.players[0] === socket.id) {
+				socket.emit('start-match', { isHost: true });
+				socket.broadcast.to(room.name).emit('start-match', { isHost: false });
+			} else {
+				socket.emit('start-match', { isHost: false });
+				socket.broadcast.to(room.name).emit('start-match', { isHost: true });
+			}
 			// emit simulation frames to all non-host players in room
 			socket.on('simulation-frame', function(data) {
 				socket.broadcast.to(room.name).emit('simulation-frame', data);

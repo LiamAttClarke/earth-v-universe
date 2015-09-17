@@ -43571,6 +43571,7 @@ if (typeof exports !== 'undefined') {
 	}
 	
 	// Networking
+	//var socket = io(); // local tests
 	var socket = io('http://romjam-liamattclarke.rhcloud.com:8080');
 	
 	// Game Scene Objects
@@ -43582,9 +43583,6 @@ if (typeof exports !== 'undefined') {
 		waiting: document.getElementById('waiting-panel'),
 		game: document.getElementById('game-panel')
 	};
-	var mainMenuPanel = document.getElementById('mainmenu-panel');
-	var waitingPanel = document.getElementById('waiting-panel');
-	var inGamePanel = document.getElementById('ingame-panel');
 	var inputName = document.getElementById('input-name');
 	var playBtn = document.getElementById('play-btn');
 	
@@ -43692,7 +43690,7 @@ if (typeof exports !== 'undefined') {
 		setActivePanel('waiting');
 		// init game
 		socket.emit('find-match');
-		socket.on('init-match', function(data) {
+		socket.on('start-match', function(data) {
 			isHost = data.isHost;
 			initGame();
 		});
@@ -43703,6 +43701,8 @@ if (typeof exports !== 'undefined') {
 	-------------------*/
 	
 	function initGame() {
+		// set GUI
+		setActivePanel('game');
 		// Set Scene to Render
 		if(isHost) {
 			scenes.game = new Physijs.Scene();
@@ -43718,17 +43718,14 @@ if (typeof exports !== 'undefined') {
 			new THREE.MeshNormalMaterial()
 		); 
 		scenes.game.add( planet );
-		// 2 players in room
-		socket.on('start-match', function() {
-			if(!isHost) {
-				socket.on("simulation-frame", function(data) {
-					gameState = data;
-				});
-			}
-			// fire projectile
-			window.addEventListener('touchstart', function(event) {
-				// add object
+		if(!isHost) {
+			socket.on("simulation-frame", function(data) {
+				gameState = data;
 			});
+		}
+		// fire projectile
+		window.addEventListener('touchstart', function(event) {
+			// add object
 		});
 	}
 	
