@@ -2,8 +2,8 @@ var express = require('express');
 var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
-var server_port = process.env.OPENSHIFT_NODEJS_PORT || 8080;
-var server_ip_address = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1';
+app.set('port', process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || 3002);
+app.set('ip', process.env.OPENSHIFT_NODEJS_IP || "127.0.0.1");
 
 //set static folder for application
 app.use(express.static('public'));
@@ -14,8 +14,8 @@ app.get("/", function(request, response) {
 });
 
 // open port 1337 for communication
-server.listen(server_port, server_ip_address, function() {
-	console.log('Listening on ip: %s, on port: %d', server_ip_address, server_port);
+server.listen(app.get('port'), app.get('ip'), function() {
+	console.log('Listening on ip: %s, on port: %d', app.get('ip'), app.get('port'));
 });
 
 var rooms = [];
