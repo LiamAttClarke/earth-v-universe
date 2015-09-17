@@ -2,8 +2,14 @@ var express = require('express');
 var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
+io.set('transports', ['websocket']);
 var PORT = process.env.OPENSHIFT_INTERNAL_PORT || process.env.OPENSHIFT_NODEJS_PORT;
 var IPADDRESS = process.env.OPENSHIFT_INTERNAL_IP || process.env.OPENSHIFT_NODEJS_IP;
+
+// open port for communication
+server.listen(PORT, IPADDRESS, function() {
+	console.log('Listening on ip: %s, on port: %d', IPADDRESS, PORT);
+});
 
 //set static folder for application
 app.use(express.static('public'));
@@ -11,11 +17,6 @@ app.use(express.static('public'));
 // serve application
 app.get("/", function(request, response) {
 	response.sendFile(__dirname + '/index.html');
-});
-
-// open port for communication
-server.listen(PORT, IPADDRESS, function() {
-	console.log('Listening on ip: %s, on port: %d', IPADDRESS, PORT);
 });
 
 var rooms = [];

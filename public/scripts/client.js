@@ -6,6 +6,7 @@
 	Physijs.scripts.worker = '/libs/physi-worker.js';
 	Physijs.scripts.ammo = '/libs/ammo.js';
 	var io = require('socket.io-client');
+	var socket = io.connect('ws://romjam-liamattclarke.rhcloud.com:8000');
 	
 	// Settings
 	var settings = {
@@ -22,9 +23,6 @@
 	var gameState = {
 		projectiles: []
 	}
-	
-	// Networking
-	var socket = io.connect('http://romjam-liamattclarke.rhcloud.com');
 	
 	// Game Scene Objects
 	var planet;
