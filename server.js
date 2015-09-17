@@ -2,7 +2,7 @@ var express = require('express');
 var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
-var port = 1337;
+var port = 8080;
 
 //set static folder for application
 app.use(express.static('public'));
@@ -13,7 +13,7 @@ app.get("/", function(request, response) {
 });
 
 // open port 1337 for communication
-server.listen(1337, function() {
+server.listen(port, function() {
 	console.log('Listening on port %d', port);
 });
 
