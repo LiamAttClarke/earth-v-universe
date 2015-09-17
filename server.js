@@ -2,8 +2,8 @@ var express = require('express');
 var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
-app.set('port', process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || 3000);
-app.set('ip', process.env.OPENSHIFT_NODEJS_IP || "127.0.0.1");
+app.set('port', process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || 3001);
+app.set('ip', process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1');
 
 //set static folder for application
 app.use(express.static('public'));
