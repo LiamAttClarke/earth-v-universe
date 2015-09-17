@@ -12,6 +12,9 @@ BODY {
 	background-color: #000000;
 	opacity: 0.6;
 }
+#loading-panel {
+	background-color: #000000;
+}
 #menu-panel {
 	display: inline;
 }

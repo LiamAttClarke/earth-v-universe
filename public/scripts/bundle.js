@@ -43583,6 +43583,7 @@ if (typeof exports !== 'undefined') {
 	};
 	var inputName = document.getElementById('input-name');
 	var playBtn = document.getElementById('play-btn');
+	playBtn.addEventListener('click', findMatch);
 	
 	// Device Orientation
 	var applyDeviceOrientation = function() {
@@ -43670,7 +43671,6 @@ if (typeof exports !== 'undefined') {
 	function initMenu() {
 		// set GUI
 		setActivePanel('menu');
-		playBtn.addEventListener('click', findMatch);
 		// init menu scene
 		currentScene = scenes.menu;
 		initSkyBox(scenes.menu);
@@ -43690,7 +43690,7 @@ if (typeof exports !== 'undefined') {
 		socket.emit('find-match');
 		socket.on('start-match', function(data) {
 			socket.on('player-disconnected', function() {
-				initMenu();
+				setActivePanel('waiting');
 			});
 			isHost = data.isHost;
 			initGame();
