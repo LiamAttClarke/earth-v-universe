@@ -13,7 +13,7 @@ app.get("/", function(request, response) {
 	response.sendFile(__dirname + '/index.html');
 });
 
-// open port 1337 for communication
+// open port for communication
 server.listen(port, ip, function() {
 	console.log('Listening on ip: %s, on port: %d', ip, port);
 });
