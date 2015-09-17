@@ -43689,6 +43689,9 @@ if (typeof exports !== 'undefined') {
 		// init game
 		socket.emit('find-match');
 		socket.on('start-match', function(data) {
+			socket.on('player-disconnected', function() {
+				initMenu();
+			});
 			isHost = data.isHost;
 			initGame();
 		});

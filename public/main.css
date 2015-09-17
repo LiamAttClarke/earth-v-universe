@@ -20,7 +20,7 @@ BODY {
 	bottom: 0;
 }
 #waiting-panel {
-	background-color: #ff0000;
+	background-color: #000000;
 }
 #game-panel {
 	display: none;

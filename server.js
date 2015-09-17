@@ -1,7 +1,7 @@
 var express = require('express');
 var app = express();
 var server = require('http').Server(app);
-var io = require('socket.io').listen(server);
+var io = require('socket.io')(server);
 var PORT = process.env.OPENSHIFT_INTERNAL_PORT || process.env.OPENSHIFT_NODEJS_PORT;
 var IPADDRESS = process.env.OPENSHIFT_INTERNAL_IP || process.env.OPENSHIFT_NODEJS_IP;
 
@@ -32,7 +32,12 @@ io.sockets.on('connection', function(socket) {
 	// connection lost event
 	socket.on('disconnect', function() {
 		console.log(socket.id + ' - disconnected');
-		if(room) leaveRoom(socket, room);
+		// leave room
+		if(room) {
+			leaveRoom(socket, room);
+			io.sockets.to(room.name).emit('player-disconnected');
+		}
+		// remove last room if empty
 		if(rooms.length > 0) {
 			if(rooms[rooms.length - 1].players.length === 0) {
 				rooms.pop();
