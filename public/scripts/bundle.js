@@ -43553,25 +43553,22 @@ if (typeof exports !== 'undefined') {
 	Physijs.scripts.worker = '/libs/physi-worker.js';
 	Physijs.scripts.ammo = '/libs/ammo.js';
 	var io = require('socket.io-client');
+	
 	// Settings
 	var settings = {
 		frameRate: 30,
 		fieldOfView: 60,
-		cameraOrbitRadius: 5
+		cameraOrbitRadius: 5,
+		planetRadius: 1
 	};
 	
+	// Globals
 	var camera, renderer, currentScene, isHost;
 	var scenes = {};
 	var deviceData = {};
 	var gameState = {
-		projectiles: {}
+		projectiles: []
 	}
-	
-	// GUI
-	var mainMenu = document.getElementById('main-menu');
-	var inputName = document.getElementById('input-name');
-	var playBtn = document.getElementById('play-btn');
-	playBtn.addEventListener('click', findMatch);
 	
 	// Networking
 	var socket = io();
@@ -43579,21 +43576,24 @@ if (typeof exports !== 'undefined') {
 	// Game Scene Objects
 	var planet;
 	
-	// Players
-	var player = {
-		name: 'anonymous',
-		quaternion: new THREE.Quaternion()
+	// GUI
+	var guiPanels = {
+		menu: document.getElementById('menu-panel'),
+		waiting: document.getElementById('waiting-panel'),
+		game: document.getElementById('game-panel')
 	};
-	var opponent = {
-		name: 'anonymous'	
-	};
+	var mainMenuPanel = document.getElementById('mainmenu-panel');
+	var waitingPanel = document.getElementById('waiting-panel');
+	var inGamePanel = document.getElementById('ingame-panel');
+	var inputName = document.getElementById('input-name');
+	var playBtn = document.getElementById('play-btn');
 	
-	var setObjectRotation = function() {
+	// Device Orientation
+	var applyDeviceOrientation = function() {
 		var axisZ = new THREE.Vector3( 0, 0, 1 );
 		var euler = new THREE.Euler();
 		var q0 = new THREE.Quaternion();
 		var root2Over2 = Math.sqrt( 0.5 );
-		
 		var q1 = new THREE.Quaternion( -root2Over2, 0, 0, root2Over2 ); // - PI/2 around the x-axis
 		return function(quaternion, alpha, beta, gamma, orientation) {
 			euler.set( beta, alpha, -gamma, 'YXZ' );                       		  // 'ZXY' for the device, but 'YXZ' for us
@@ -43603,58 +43603,99 @@ if (typeof exports !== 'undefined') {
 		};
 	}();
 	
+	/*-------------
+		PLAYER
+	-------------*/
+	
+	var player;
+	var attacker = {
+		updateOrientation: function() {
+			var quaternion = new THREE.Quaternion();
+			return function() {
+				var alpha = deviceData.alpha ? THREE.Math.degToRad( deviceData.alpha ) : 0; // Z
+				var beta = deviceData.beta ? THREE.Math.degToRad( deviceData.beta ) : 0; // X
+				var gamma = deviceData.gamma ? THREE.Math.degToRad( deviceData.gamma ) : 0; // Y
+				var orient = window.orientation ? THREE.Math.degToRad( window.orientation ) : 0; // Orientation
+				applyDeviceOrientation( quaternion, alpha, beta, gamma, orient );
+				var pos = (new THREE.Vector3( 0, 0, settings.cameraOrbitRadius ) ).applyQuaternion( quaternion  );
+				camera.position.set(pos.x, pos.y, pos.z);
+				applyDeviceOrientation( camera.quaternion, alpha, beta, gamma, orient );
+			}
+		}()
+	};
+	var defender = {
+		updateOrientation: function() {
+			var quaternion = new THREE.Quaternion();
+			return function() {
+				var alpha = deviceData.alpha ? THREE.Math.degToRad( deviceData.alpha ) : 0; // Z
+				var beta = deviceData.beta ? THREE.Math.degToRad( deviceData.beta ) : 0; // X
+				var gamma = deviceData.gamma ? THREE.Math.degToRad( deviceData.gamma ) : 0; // Y
+				var orient = window.orientation ? THREE.Math.degToRad( window.orientation ) : 0; // Orientation
+				applyDeviceOrientation( quaternion, alpha, beta, gamma, orient );
+				var pos = (new THREE.Vector3( 0, 0, settings.planetRadius ) ).applyQuaternion( quaternion  );
+				camera.position.set(pos.x, pos.y, pos.z);
+				applyDeviceOrientation( camera.quaternion, alpha, beta, gamma, orient );
+			}
+		}()
+	};
+	
+	/*--------------
+		INIT APP
+	--------------*/
+	
 	// called before start
 	(function initApp() {
 		// init Scenes
 		scenes.menu = new THREE.Scene();
-		// game scene initializes everytime a match is started
-		currentScene = scenes.menu;
-		
 		// init Camera
 		camera = new THREE.PerspectiveCamera(settings.fieldOfView, window.innerWidth / window.innerHeight, 0.1, 1000);
 		// init Renderer
 		renderer = new THREE.WebGLRenderer();
 		renderer.setSize( window.innerWidth, window.innerHeight ); 
 		document.body.appendChild( renderer.domElement );
-		
 		// window resize event
 		window.addEventListener('resize', function() {
 			camera.aspect = window.innerWidth / window.innerHeight;
 			camera.updateProjectionMatrix();
 			renderer.setSize( window.innerWidth, window.innerHeight );
 		}, false);
-		
 		// Device orientation event
 		window.addEventListener('deviceorientation', function(event) {
 			deviceData = event;
 		}, false);
-		
 		// initialize main menu
 		initMenu();
 	})();
 	
-	/*-------------------
-		MENU SCENE
-	-------------------*/
+	/*--------------------
+		INIT MENU SCENE
+	---------------------*/
 	
 	function initMenu() {
+		// set GUI
+		setActivePanel('menu');
+		playBtn.addEventListener('click', findMatch);
+		// init menu scene
 		currentScene = scenes.menu;
-		// init Skybox
 		initSkyBox(scenes.menu);
-		
+		player = attacker;
 		// begin render vindaloop
 		update();
 	}
 	
-	/*----------------
+	/*---------------
 		FIND MATCH
 	----------------*/
 	
 	function findMatch() {
-		mainMenu.style.display = 'none';
-		assignPlayerName();
-		initGame();
+		// set GUI
+		setActivePanel('waiting');
+		// init game
 		socket.emit('find-match');
+		socket.on('init-match', function(data) {
+			isHost = data.isHost;
+			initGame();
+		});
 	}
 	
 	/*-------------------
@@ -43663,26 +43704,30 @@ if (typeof exports !== 'undefined') {
 	
 	function initGame() {
 		// Set Scene to Render
-		socket.on("init-match", function(data) {
-			isHost = data.isHost;
-			if(isHost) scenes.game = new Physijs.Scene();
-			else scenes.game = new THREE.Scene();
-			currentScene = scenes.game;
-			// init Skybox
-			initSkyBox(scenes.game);
-			// Planet
-			/*planet = new THREE.BoxMesh(
-				new THREE.BoxGeometry(1, 1, 1),
-				new THREE.MeshNormalMaterial()
-			); */
-			// init planet
-			planet = new THREE.Mesh(
-				new THREE.BoxGeometry(1, 1, 1),
-				new THREE.MeshNormalMaterial()
-			); 
-			scenes.game.add( planet );
-			socket.on("simulation-frame", function(data) {
-				gameState = data;
+		if(isHost) {
+			scenes.game = new Physijs.Scene();
+		} else {
+			scenes.game = new THREE.Scene();
+		}
+		currentScene = scenes.game;
+		// init Skybox
+		initSkyBox(scenes.game);
+		// init planet
+		planet = new THREE.Mesh(
+			new THREE.BoxGeometry(1, 1, 1),
+			new THREE.MeshNormalMaterial()
+		); 
+		scenes.game.add( planet );
+		// 2 players in room
+		socket.on('start-match', function() {
+			if(!isHost) {
+				socket.on("simulation-frame", function(data) {
+					gameState = data;
+				});
+			}
+			// fire projectile
+			window.addEventListener('touchstart', function(event) {
+				// add object
 			});
 		});
 	}
@@ -43693,8 +43738,7 @@ if (typeof exports !== 'undefined') {
 
 	function update() {
 		// player orientation
-		updateRotation();
-		
+		player.updateOrientation();
 		// Render Scene
 		if(currentScene === scenes.game && isHost) {
 			scenes.game.simulate();
@@ -43707,17 +43751,7 @@ if (typeof exports !== 'undefined') {
 		}, 1000 / settings.frameRate );
 	}
 	
-	function updateRotation() {
-		var alpha = deviceData.alpha ? THREE.Math.degToRad( deviceData.alpha ) : 0; // Z
-		var beta = deviceData.beta ? THREE.Math.degToRad( deviceData.beta ) : 0; // X
-		var gamma = deviceData.gamma ? THREE.Math.degToRad( deviceData.gamma ) : 0; // Y
-		var orient = window.orientation ? THREE.Math.degToRad( window.orientation ) : 0; // O
-		setObjectRotation( player.quaternion, alpha, beta, gamma, orient );
-		var pos = (new THREE.Vector3( 0, 0, settings.cameraOrbitRadius ) ).applyQuaternion( player.quaternion  );
-		camera.position.set(pos.x, pos.y, pos.z);
-		setObjectRotation( camera.quaternion, alpha, beta, gamma, orient );
-	}
-	
+	// Skybox
 	function initSkyBox(scene) {
 		var urlPrefix = 'assets/textures/skybox/space/';
 		var cubeMapFaces = [
@@ -43745,9 +43779,16 @@ if (typeof exports !== 'undefined') {
 		scene.add( skyBox );
 	}
 	
-	function assignPlayerName() {
-		var regex = /^[a-zA-Z0-9]+$/;
-		if(regex.test(inputName.value)) player.name = inputName.value.toUpperCase();
+	function setActivePanel(panelName) {
+		for (var panel in guiPanels) {
+			if (guiPanels.hasOwnProperty(panel)) {
+				if(panel === panelName) {
+					guiPanels[panel].style.display = 'inline';
+					continue;
+				}
+				guiPanels[panel].style.display = 'none';
+			}
+		}
 	}
 	
 	// Debugging
