@@ -25,7 +25,7 @@
 	
 	// Networking
 	//var socket = io(); // local tests
-	var socket = io('http://127.0.0.1:8080');
+	var socket = io('http://127.0.0.1:8000');
 	
 	// Game Scene Objects
 	var planet;
