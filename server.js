@@ -1,8 +1,7 @@
 var express = require('express');
 var app = express();
-var server = require('http').Server(app);
-var io = require('socket.io')(server);
-io.set('transports', ['websocket']);
+var server = require('https').Server(app);
+var io = require('socket.io').listen(server);
 var PORT = process.env.OPENSHIFT_INTERNAL_PORT || process.env.OPENSHIFT_NODEJS_PORT;
 var IPADDRESS = process.env.OPENSHIFT_INTERNAL_IP || process.env.OPENSHIFT_NODEJS_IP;
 

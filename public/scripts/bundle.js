@@ -43552,8 +43552,9 @@ if (typeof exports !== 'undefined') {
 	var Physijs = require('physijs-browserify')(THREE);
 	Physijs.scripts.worker = '/libs/physi-worker.js';
 	Physijs.scripts.ammo = '/libs/ammo.js';
+	// Networking
 	var io = require('socket.io-client');
-	var socket = io.connect('ws://romjam-liamattclarke.rhcloud.com:8000');
+	var socket = io.connect('wss://romjam-liamattclarke.rhcloud.com:8443');
 	
 	// Settings
 	var settings = {
