@@ -30,8 +30,9 @@
 	
 	// GUI
 	var guiPanels = {
+		load: document.getElementById('load-panel'),
 		menu: document.getElementById('menu-panel'),
-		waiting: document.getElementById('waiting-panel'),
+		wait: document.getElementById('wait-panel'),
 		game: document.getElementById('game-panel')
 	};
 	var inputName = document.getElementById('input-name');
@@ -138,12 +139,13 @@
 	
 	function findMatch() {
 		// set GUI
-		setActivePanel('waiting');
+		setActivePanel('wait');
 		// init game
 		socket.emit('find-match');
+		// start match
 		socket.on('start-match', function(data) {
 			socket.on('player-disconnected', function() {
-				setActivePanel('waiting');
+				setActivePanel('wait');
 			});
 			isHost = data.isHost;
 			initGame();

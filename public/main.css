@@ -12,17 +12,19 @@ BODY {
 	background-color: #000000;
 	opacity: 0.6;
 }
-#loading-panel {
+#load-panel {
+	display: inline;
 	background-color: #000000;
 }
 #menu-panel {
-	display: inline;
+	display: none;
 }
 #menu {
 	position: absolute;
 	bottom: 0;
 }
-#waiting-panel {
+#wait-panel {
+	display: none;
 	background-color: #000000;
 }
 #game-panel {
