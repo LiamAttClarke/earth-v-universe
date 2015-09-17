@@ -12,14 +12,17 @@ BODY {
 	background-color: #000000;
 	opacity: 0.6;
 }
-#main-panel {
-	display: default;
+#menu-panel {
+	display: inline;
 }
-#main-menu {
+#menu {
 	position: absolute;
 	bottom: 0;
 }
-#ingame-panel {
+#waiting-panel {
+	background-color: #000000;
+}
+#game-panel {
 	display: none;
 }
 .panel {

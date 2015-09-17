@@ -43653,10 +43653,8 @@ if (typeof exports !== 'undefined') {
 	function findMatch() {
 		mainMenu.style.display = 'none';
 		assignPlayerName();
+		initGame();
 		socket.emit('find-match');
-		socket.on('start-match', function() {
-			initGame();
-		});
 	}
 	
 	/*-------------------
@@ -43750,7 +43748,6 @@ if (typeof exports !== 'undefined') {
 	function assignPlayerName() {
 		var regex = /^[a-zA-Z0-9]+$/;
 		if(regex.test(inputName.value)) player.name = inputName.value.toUpperCase();
-		//debug(player.name);
 	}
 	
 	// Debugging

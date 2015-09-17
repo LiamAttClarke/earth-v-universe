@@ -41,10 +41,9 @@ io.sockets.on('connection', function(socket) {
 	});
 	// user requests matchmaking
 	socket.on('find-match', function() {
-		console.log(socket.id + ' - started game');
+		console.log(socket.id + ' - started match');
 		room = joinOrCreateRoom(socket.id);
 		socket.join(room.name);
-		socket.emit('start-match');
 		// set host of match
 		if(room.players[0] === socket.id) {
 			socket.emit('init-match', { isHost: true });
@@ -55,10 +54,14 @@ io.sockets.on('connection', function(socket) {
 		}
 		console.log(socket.id + ' - ' + room.name);
 		console.log('Room Count = ' + rooms.length);
-		// emit simulation frames to all non-host players in room
-		socket.on('simulation-frame', function(data) {
-			socket.broadcast.to(room.name).emit('simulation-frame', data);
-		});
+		if(room.players.length === 2) {
+			// start match
+			io.broadcast.to(room.name).emit('start-match');
+			// emit simulation frames to all non-host players in room
+			socket.on('simulation-frame', function(data) {
+				socket.broadcast.to(room.name).emit('simulation-frame', data);
+			});	
+		}
 	});
 });
 
