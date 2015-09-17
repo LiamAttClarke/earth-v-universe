@@ -43572,7 +43572,7 @@ if (typeof exports !== 'undefined') {
 	
 	// Networking
 	//var socket = io(); // local tests
-	var socket = io('//romjam-liamattclarke.rhcloud.com:8080');
+	var socket = io('https://127.0.0.1:8080');
 	
 	// Game Scene Objects
 	var planet;
