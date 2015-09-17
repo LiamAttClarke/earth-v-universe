@@ -24,7 +24,7 @@
 	}
 	
 	// Networking
-	var socket = io();
+	var socket = io('http://romjam-liamattclarke.rhcloud.com:8080');
 	
 	// Game Scene Objects
 	var planet;
