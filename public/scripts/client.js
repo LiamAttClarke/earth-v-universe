@@ -7,7 +7,7 @@
 	Physijs.scripts.ammo = '/libs/ammo.js';
 	// Networking
 	var io = require('socket.io-client');
-	var socket = io.connect('http://romjam-liamattclarke.rhcloud.com:8000', {'forceNew':true});
+	var socket = io.connect('https://romjam-liamattclarke.rhcloud.com:8443', {'forceNew':true});
 	
 	// Settings
 	var settings = {
