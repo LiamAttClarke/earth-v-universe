@@ -43562,7 +43562,7 @@ if (typeof exports !== 'undefined') {
 		fieldOfView: 60,
 		cameraOrbitRadius: 5,
 		planetRadius: 1,
-		asteroidSpawnForce: 10000000
+		asteroidSpawnForce: 1000
 	};
 	
 	// Globals
@@ -43638,6 +43638,7 @@ if (typeof exports !== 'undefined') {
 		}(),
 		initScene: function() {
 			scenes.game = new Physijs.Scene();
+			scenes.game.setGravity(new THREE.Vector3( 0, -30, 0 ));
 			// init planet
 			scenes.game.add( planet );
 			socket.on("simulation-frame", function(data) {
