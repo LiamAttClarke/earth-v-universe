@@ -43622,7 +43622,7 @@ if (typeof exports !== 'undefined') {
 				applyDeviceOrientation( camera.quaternion, alpha, beta, gamma, orient );
 			}
 		}(),
-		initGame: function() {
+		initScene: function() {
 			scenes.game = new Physijs.Scene();
 			// init planet
 			planet = new THREE.Mesh(
@@ -43635,7 +43635,7 @@ if (typeof exports !== 'undefined') {
 			});
 		},
 		fire: function() {
-			
+			// fire projectile
 		}
 	};
 	var defender = {
@@ -43646,7 +43646,7 @@ if (typeof exports !== 'undefined') {
 			var orient = window.orientation ? THREE.Math.degToRad( window.orientation ) : 0; // Orientation
 			applyDeviceOrientation( camera.quaternion, alpha, beta, gamma, orient );
 		},
-		initGame: function() {
+		initScene: function() {
 			scenes.game = new THREE.Scene();
 			planet = new THREE.Mesh(
 				sphereGeometry,
@@ -43655,7 +43655,7 @@ if (typeof exports !== 'undefined') {
 			scenes.game.add( planet );
 		},
 		fire: function() {
-			
+			// fire projectile
 		}
 	};
 	
@@ -43730,12 +43730,12 @@ if (typeof exports !== 'undefined') {
 	function initGame() {
 		// set GUI
 		setActivePanel('game');
+		// init player scene
+		player.initScene();
 		// set current scene
 		currentScene = scenes.game;
 		// init Skybox
 		initSkyBox(scenes.game);
-		// init player game
-		player.initGame();
 		// fire projectile
 		window.addEventListener('touchstart', player.fire);
 	}
