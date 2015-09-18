@@ -43572,11 +43572,6 @@ if (typeof exports !== 'undefined') {
 	var gameState = {
 		asteroids: []
 	}
-	function object(id, position, rotation) {
-		this.id = id;
-		this.position = position;
-		this.rotation = rotation;
-	}
 	
 	// Prefab Objects
 	var asteroidObject = {
@@ -43647,7 +43642,7 @@ if (typeof exports !== 'undefined') {
 		},
 		// fire projectile
 		fire: function(event) {
-			var asteroid = new Physijs.SphereMesh(
+			/*var asteroid = new Physijs.SphereMesh(
 				asteroidObject.geometry,
 				asteroidObject.material,
 				1
@@ -43656,7 +43651,7 @@ if (typeof exports !== 'undefined') {
 			asteroid.position.set(0, 0, 1);
 			var force = new THREE.Vector3(0, 0, settings.asteroidSpawnForce);
 			asteroid.applyCentralImpulse(force);
-			//gameState.asteroids.push( asteroid );
+			//gameState.asteroids.push( asteroid );*/
 		}
 	};
 	var defender = {
@@ -43765,7 +43760,6 @@ if (typeof exports !== 'undefined') {
 		player.updateOrientation();
 		// Render Scene
 		if(currentScene === scenes.game && isHost) {
-			debug("yes");
 			scenes.game.simulate();
 			socket.emit('simulation-frame', gameState);
 		}
