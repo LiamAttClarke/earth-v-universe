@@ -43704,24 +43704,23 @@ if (typeof exports !== 'undefined') {
 		if(isHost) {
 			scenes.game = new Physijs.Scene();
 			player = attacker;
+			// init planet
+			planet = new THREE.Mesh(
+				new THREE.BoxGeometry(1, 1, 1),
+				new THREE.MeshNormalMaterial()
+			);
+			scenes.game.add( planet );
+			socket.on("simulation-frame", function(data) {
+				gameState = data;
+			});
 		} else {
 			scenes.game = new THREE.Scene();
+			camera.position.set(0, 0, 0);
 			player = defender;
 		}
 		currentScene = scenes.game;
 		// init Skybox
 		initSkyBox(scenes.game);
-		// init planet
-		planet = new THREE.Mesh(
-			new THREE.BoxGeometry(1, 1, 1),
-			new THREE.MeshNormalMaterial()
-		); 
-		scenes.game.add( planet );
-		if(!isHost) {
-			socket.on("simulation-frame", function(data) {
-				gameState = data;
-			});
-		}
 		// fire projectile
 		window.addEventListener('touchstart', function(event) {
 			// add object
