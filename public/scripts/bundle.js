@@ -43623,18 +43623,12 @@ if (typeof exports !== 'undefined') {
 	};
 	var defender = {
 		updateOrientation: function() {
-			var quaternion = new THREE.Quaternion();
-			return function() {
-				var alpha = deviceData.alpha ? THREE.Math.degToRad( deviceData.alpha ) : 0; // Z
-				var beta = deviceData.beta ? THREE.Math.degToRad( deviceData.beta ) : 0; // X
-				var gamma = deviceData.gamma ? THREE.Math.degToRad( deviceData.gamma ) : 0; // Y
-				var orient = window.orientation ? THREE.Math.degToRad( window.orientation ) : 0; // Orientation
-				applyDeviceOrientation( quaternion, alpha, beta, gamma, orient );
-				var pos = (new THREE.Vector3( 0, 0, settings.planetRadius ) ).applyQuaternion( quaternion  );
-				camera.position.set(pos.x, pos.y, pos.z);
-				applyDeviceOrientation( camera.quaternion, alpha, beta, gamma, orient );
-			}
-		}()
+			var alpha = deviceData.alpha ? THREE.Math.degToRad( deviceData.alpha ) : 0; // Z
+			var beta = deviceData.beta ? THREE.Math.degToRad( deviceData.beta ) : 0; // X
+			var gamma = deviceData.gamma ? THREE.Math.degToRad( deviceData.gamma ) : 0; // Y
+			var orient = window.orientation ? THREE.Math.degToRad( window.orientation ) : 0; // Orientation
+			applyDeviceOrientation( camera.quaternion, alpha, beta, gamma, orient );
+		}
 	};
 	
 	/*--------------
@@ -43648,7 +43642,7 @@ if (typeof exports !== 'undefined') {
 		// init Camera
 		camera = new THREE.PerspectiveCamera(settings.fieldOfView, window.innerWidth / window.innerHeight, 0.1, 1000);
 		// init Renderer
-		renderer = new THREE.WebGLRenderer();
+		renderer = new THREE.WebGLRenderer({antialias:true});
 		renderer.setSize( window.innerWidth, window.innerHeight ); 
 		document.body.appendChild( renderer.domElement );
 		// window resize event
