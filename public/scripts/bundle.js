@@ -43765,6 +43765,7 @@ if (typeof exports !== 'undefined') {
 		player.updateOrientation();
 		// Render Scene
 		if(currentScene === scenes.game && isHost) {
+			debug("yes");
 			scenes.game.simulate();
 			socket.emit('simulation-frame', gameState);
 		}
