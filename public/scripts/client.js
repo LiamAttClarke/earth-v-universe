@@ -15,7 +15,7 @@
 		fieldOfView: 60,
 		cameraOrbitRadius: 5,
 		planetRadius: 1,
-		asteroidSpawnForce: 100000
+		asteroidSpawnForce: 10000000
 	};
 	
 	// Globals
@@ -106,7 +106,7 @@
 			);
 			scenes.game.add( asteroid );
 			asteroid.position.set(0, 0, 1);
-			var force = (new THREE.Vector3(0, 0, 1)).multiplyScalar(settings.asteroidSpawnForce);
+			var force = new THREE.Vector3(0, 0, settings.asteroidSpawnForce);
 			asteroid.applyCentralImpulse(force);
 			//gameState.asteroids.push( asteroid );
 		}
@@ -205,7 +205,7 @@
 		// init Skybox
 		initSkyBox(scenes.game);
 		// fire projectile
-		window.addEventListener('touchstart', player.fire(event));
+		window.addEventListener('click', player.fire(event));
 	}
 	
 	/*----------------------
