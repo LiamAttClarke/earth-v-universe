@@ -43650,7 +43650,7 @@ if (typeof exports !== 'undefined') {
 			scenes.game = new THREE.Scene();
 			planet = new THREE.Mesh(
 				sphereGeometry,
-				new THREE.LineBasicMaterial()
+				new THREE.LineBasicMaterial({ side: THREE.BackSide })
 			);
 			scenes.game.add( planet );
 		},
