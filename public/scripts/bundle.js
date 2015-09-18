@@ -43627,7 +43627,7 @@ if (typeof exports !== 'undefined') {
 			// init planet
 			planet = new THREE.Mesh(
 				planetGeometry,
-				new THREE.MeshNormalMaterial()
+				new THREE.LineBasicMaterial()
 			);
 			scenes.game.add( planet );
 			socket.on("simulation-frame", function(data) {
