@@ -43550,8 +43550,8 @@ if (typeof exports !== 'undefined') {
 	// Dependencies
 	var THREE = require('three');
 	var Physijs = require('physijs-browserify')(THREE);
-	Physijs.scripts.worker = '/libs/physi-worker.js';
-	Physijs.scripts.ammo = '/libs/ammo.js';
+	Physijs.scripts.worker = 'public/libs/physi-worker.js';
+	Physijs.scripts.ammo = 'public/libs/ammo.js';
 	// Networking
 	var io = require('socket.io-client');
 	var socket = io.connect('https://romjam-liamattclarke.rhcloud.com:8443', {'forceNew':true});
@@ -43583,7 +43583,7 @@ if (typeof exports !== 'undefined') {
 	var planet = new Physijs.BoxMesh(
 		new THREE.BoxGeometry(1, 1, 1),
 		new THREE.MeshNormalMaterial(),
-		0
+		1
 	);	
 			
 	// GUI
