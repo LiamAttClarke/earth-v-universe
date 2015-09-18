@@ -156,8 +156,10 @@
 		// Set Scene to Render
 		if(isHost) {
 			scenes.game = new Physijs.Scene();
+			player = attacker;
 		} else {
 			scenes.game = new THREE.Scene();
+			player = defender;
 		}
 		currentScene = scenes.game;
 		// init Skybox
