@@ -15,7 +15,7 @@
 		fieldOfView: 60,
 		cameraOrbitRadius: 5,
 		planetRadius: 1,
-		asteroidSpawnForce: 10
+		asteroidSpawnForce: 100
 	};
 	
 	// Globals
@@ -33,7 +33,7 @@
 	
 	// Prefab Objects
 	var asteroidObject = {
-		geometry: new THREE.SphereGeometry(1, 16, 16),
+		geometry: new THREE.SphereGeometry(0.1, 8, 8),
 		material: new THREE.MeshNormalMaterial()
 	};
 	
@@ -98,7 +98,7 @@
 			});
 		},
 		// fire projectile
-		fire: function() {
+		fire: function(event) {
 			var asteroid = new Physijs.SphereMesh(
 				asteroidObject.geometry,
 				asteroidObject.material,
@@ -107,8 +107,8 @@
 			scenes.game.add( asteroid );
 			asteroid.position.set(0, 0, 1);
 			var force = (new THREE.Vector3(0, 0, 1)).multiplyScalar(settings.asteroidSpawnForce);
-			asteroid.applyImpulse(force, new THREE.Vector3(0,0,0));
-			gameState.asteroids.push( asteroid );
+			asteroid.applyCentralImpulse(force);
+			//gameState.asteroids.push( asteroid );
 		}
 	};
 	var defender = {
@@ -205,7 +205,7 @@
 		// init Skybox
 		initSkyBox(scenes.game);
 		// fire projectile
-		window.addEventListener('touchstart', player.fire);
+		window.addEventListener('touchstart', player.fire(event));
 	}
 	
 	/*----------------------
