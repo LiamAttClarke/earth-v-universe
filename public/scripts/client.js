@@ -2,7 +2,7 @@
 (function() {
 	// Dependencies
 	var THREE = require('three');
-	var Physijs = require('physijs-browserify')(THREE);
+	//var Physijs = require('physijs-browserify')(THREE);
 	Physijs.scripts.worker = 'scripts/physi-worker.js';
 	Physijs.scripts.ammo = 'scripts/ammo.js';
 	// Networking
