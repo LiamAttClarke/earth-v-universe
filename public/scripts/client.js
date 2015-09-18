@@ -103,7 +103,7 @@
 			scenes.game = new THREE.Scene();
 			planet = new THREE.Mesh(
 				sphereGeometry,
-				new THREE.LineBasicMaterial({ side: THREE.BackSide })
+				new THREE.LineBasicMaterial()
 			);
 			scenes.game.add( planet );
 		},
