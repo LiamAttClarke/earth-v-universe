@@ -43561,7 +43561,8 @@ if (typeof exports !== 'undefined') {
 		frameRate: 30,
 		fieldOfView: 60,
 		cameraOrbitRadius: 5,
-		planetRadius: 1
+		planetRadius: 1,
+		asteroidSpawnForce: 10
 	};
 	
 	// Globals
@@ -43569,13 +43570,26 @@ if (typeof exports !== 'undefined') {
 	var scenes = {};
 	var deviceData = {};
 	var gameState = {
-		projectiles: []
+		asteroids: []
+	}
+	function object(id, position, rotation) {
+		this.id = id;
+		this.position = position;
+		this.rotation = rotation;
 	}
 	
+	// Prefab Objects
+	var asteroidObject = {
+		geometry: new THREE.SphereGeometry(1, 16, 16),
+		material: new THREE.MeshNormalMaterial()
+	};
+	
 	// Game Scene Objects
-	var planet,
-		planetGeometry = new THREE.BoxGeometry(1, 1, 1),
-		sphereGeometry = new THREE.SphereGeometry(settings.planetRadius, 16, 16);
+	var planet = new Physijs.BoxMesh(
+		new THREE.BoxGeometry(1, 1, 1),
+		new THREE.MeshNormalMaterial(),
+		0
+	);	
 			
 	// GUI
 	var guiPanels = {
@@ -43625,17 +43639,23 @@ if (typeof exports !== 'undefined') {
 		initScene: function() {
 			scenes.game = new Physijs.Scene();
 			// init planet
-			planet = new THREE.Mesh(
-				planetGeometry,
-				new THREE.LineBasicMaterial()
-			);
 			scenes.game.add( planet );
 			socket.on("simulation-frame", function(data) {
 				gameState = data;
 			});
 		},
+		// fire projectile
 		fire: function() {
-			// fire projectile
+			var asteroid = new Physijs.SphereMesh(
+				asteroidObject.geometry,
+				asteroidObject.material,
+				1
+			);
+			scenes.game.add( asteroid );
+			asteroid.position.set(0, 0, 1);
+			var force = (new THREE.Vector3(0, 0, 1)).multiplyScalar(settings.asteroidSpawnForce);
+			asteroid.applyImpulse(force, new THREE.Vector3(0,0,0));
+			gameState.asteroids.push( asteroid );
 		}
 	};
 	var defender = {
@@ -43648,11 +43668,6 @@ if (typeof exports !== 'undefined') {
 		},
 		initScene: function() {
 			scenes.game = new THREE.Scene();
-			planet = new THREE.Mesh(
-				sphereGeometry,
-				new THREE.LineBasicMaterial()
-			);
-			scenes.game.add( planet );
 		},
 		fire: function() {
 			// fire projectile
