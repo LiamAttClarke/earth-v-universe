@@ -15,7 +15,7 @@
 		fieldOfView: 60,
 		cameraOrbitRadius: 5,
 		planetRadius: 1,
-		asteroidSpawnForce: 1000
+		asteroidSpawnForce: 1000000
 	};
 	
 	// Globals
