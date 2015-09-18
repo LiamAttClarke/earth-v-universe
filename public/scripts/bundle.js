@@ -43573,8 +43573,10 @@ if (typeof exports !== 'undefined') {
 	}
 	
 	// Game Scene Objects
-	var planet;
-	
+	var planet,
+		planetGeometry = new THREE.BoxGeometry(1, 1, 1),
+		sphereGeometry = new THREE.SphereGeometry(settings.planetRadius, 16, 16);
+			
 	// GUI
 	var guiPanels = {
 		load: document.getElementById('load-panel'),
@@ -43619,7 +43621,22 @@ if (typeof exports !== 'undefined') {
 				camera.position.set(pos.x, pos.y, pos.z);
 				applyDeviceOrientation( camera.quaternion, alpha, beta, gamma, orient );
 			}
-		}()
+		}(),
+		initGame: function() {
+			scenes.game = new Physijs.Scene();
+			// init planet
+			planet = new THREE.Mesh(
+				planetGeometry,
+				new THREE.MeshNormalMaterial()
+			);
+			scenes.game.add( planet );
+			socket.on("simulation-frame", function(data) {
+				gameState = data;
+			});
+		},
+		fire: function() {
+			
+		}
 	};
 	var defender = {
 		updateOrientation: function() {
@@ -43628,6 +43645,17 @@ if (typeof exports !== 'undefined') {
 			var gamma = deviceData.gamma ? THREE.Math.degToRad( deviceData.gamma ) : 0; // Y
 			var orient = window.orientation ? THREE.Math.degToRad( window.orientation ) : 0; // Orientation
 			applyDeviceOrientation( camera.quaternion, alpha, beta, gamma, orient );
+		},
+		initGame: function() {
+			scenes.game = new THREE.Scene();
+			planet = new THREE.Mesh(
+				sphereGeometry,
+				new THREE.LineBasicMaterial()
+			);
+			scenes.game.add( planet );
+		},
+		fire: function() {
+			
 		}
 	};
 	
@@ -43669,7 +43697,7 @@ if (typeof exports !== 'undefined') {
 		// init menu scene
 		currentScene = scenes.menu;
 		initSkyBox(scenes.menu);
-		player = attacker;
+		player = defender;
 		// begin render vindaloop
 		update();
 	}
@@ -43689,6 +43717,8 @@ if (typeof exports !== 'undefined') {
 				setActivePanel('wait');
 			});
 			isHost = data.isHost;
+			if(isHost) player = attacker;
+			else player = defender;
 			initGame();
 		});
 	}
@@ -43700,31 +43730,14 @@ if (typeof exports !== 'undefined') {
 	function initGame() {
 		// set GUI
 		setActivePanel('game');
-		// Set Scene to Render
-		if(isHost) {
-			scenes.game = new Physijs.Scene();
-			player = attacker;
-			// init planet
-			planet = new THREE.Mesh(
-				new THREE.BoxGeometry(1, 1, 1),
-				new THREE.MeshNormalMaterial()
-			);
-			scenes.game.add( planet );
-			socket.on("simulation-frame", function(data) {
-				gameState = data;
-			});
-		} else {
-			scenes.game = new THREE.Scene();
-			camera.position.set(0, 0, 0);
-			player = defender;
-		}
+		// set current scene
 		currentScene = scenes.game;
 		// init Skybox
 		initSkyBox(scenes.game);
+		// init player game
+		player.initGame();
 		// fire projectile
-		window.addEventListener('touchstart', function(event) {
-			// add object
-		});
+		window.addEventListener('touchstart', player.fire);
 	}
 	
 	/*----------------------
