@@ -43692,11 +43692,11 @@ if (typeof exports !== 'undefined') {
 		// window resize event
 		window.addEventListener('resize', function() {
 			camera.aspect = window.innerWidth / window.innerHeight;
-			camera.zoom = window.innerWidth / 500;
 			camera.updateProjectionMatrix();
 			renderer.setSize( window.innerWidth, window.innerHeight );
 			if(currentScene === scenes.menu) {
 				updateLogoPos();
+				updateZoom();
 			}
 		}, false);
 		// Device orientation event
@@ -43716,6 +43716,7 @@ if (typeof exports !== 'undefined') {
 		setActivePanel('menu');
 		// update logo position
 		updateLogoPos();
+		updateZoom();
 		// init menu scene
 		currentScene = scenes.menu;
 		initSkyBox(scenes.menu);
@@ -43835,6 +43836,10 @@ if (typeof exports !== 'undefined') {
 	function updateLogoPos() {
 		var logo = document.getElementById('logo');
 		logo.style.marginTop = (window.innerHeight / 2) - (logo.clientHeight / 2) + 'px';
+	}
+	
+	function updateZoom() {
+		camera.zoom = window.innerWidth / 500;
 	}
 	
 	function screen2WorldPoint(screenX, screenY) {
