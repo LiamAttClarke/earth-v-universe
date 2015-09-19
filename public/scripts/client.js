@@ -49,7 +49,10 @@
 	};
 	var inputName = document.getElementById('input-name');
 	var playBtn = document.getElementById('play-btn');
-	playBtn.addEventListener('click', findMatch);
+	playBtn.addEventListener('touchstart', function(event) {
+		event.preventDefault();
+		findMatch();
+	});
 	
 	// Device Orientation
 	var applyDeviceOrientation = function() {
@@ -96,10 +99,11 @@
 		},
 		// fire projectile
 		fire: function(event) {
-			debug(event.screenX);
+			var touch = event.touches[0];
+			debug(touch.screenX);
 			var screenPoint = new THREE.Vector3(
-				event.screenX / window.innerWidth * 2 - 1,
-				-(event.screenY / window.innerHeight * 2 - 1),
+				touch.screenX / window.innerWidth * 2 - 1,
+				-(touch.screenY / window.innerHeight * 2 - 1),
 				0.5
 			);
 			screenPoint.unproject( camera );
@@ -206,12 +210,10 @@
 		// init Skybox
 		initSkyBox(scenes.game);
 		// fire projectile
-		window.addEventListener('click', function(event) {
+		window.addEventListener('touchstart', function(event) {
+			event.preventDefault();
 			player.fire(event);
-		});
-		window.addEventListener('touch', function(event) {
-			player.fire(event);
-		});
+		}, false);
 	}
 	
 	/*----------------------
