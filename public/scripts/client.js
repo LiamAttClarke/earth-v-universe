@@ -103,16 +103,19 @@
 			var screenPoint = new THREE.Vector3(
 				touch.screenX / window.innerWidth * 2 - 1,
 				-(touch.screenY / window.innerHeight * 2 - 1),
-				2
+				0.5
 			);
 			screenPoint.unproject( camera );
-			debug(screenPoint.x + ", " + screenPoint.y);
+			/*function screen2WorldPoint() {
+				
+			}*/
 			var asteroid = new Physijs.SphereMesh(
 				asteroidObject.geometry,
 				asteroidObject.material,
 				1
 			);
 			scenes.game.add( asteroid );
+			asteroid.__dirtyPosition = true;
 			asteroid.position.set(screenPoint.x, screenPoint.y, screenPoint.z);
 		}
 	};
