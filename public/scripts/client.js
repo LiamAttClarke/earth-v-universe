@@ -8,6 +8,7 @@
 	// Networking
 	var io = require('socket.io-client');
 	var socket = io.connect('https://romjam-liamattclarke.rhcloud.com:8443', {'forceNew':true});
+	//var socket = io(); // local testing
 	
 	// Settings
 	var settings = {
@@ -95,6 +96,7 @@
 		},
 		// fire projectile
 		fire: function(event) {
+			debug(event.screenX);
 			var screenPoint = new THREE.Vector3(
 				event.screenX / window.innerWidth * 2 - 1,
 				-(event.screenY / window.innerHeight * 2 - 1),
@@ -204,7 +206,9 @@
 		// init Skybox
 		initSkyBox(scenes.game);
 		// fire projectile
-		window.addEventListener('click', player.fire(event));
+		window.addEventListener('click', function(event) {
+			player.fire(event);
+		});
 	}
 	
 	/*----------------------

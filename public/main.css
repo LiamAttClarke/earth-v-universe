@@ -20,8 +20,10 @@ BODY {
 	display: none;
 }
 #menu {
+	width: calc(100% - 16px);
 	position: absolute;
-	bottom: 0;
+	left: 8px;
+	bottom: 8px;
 }
 #wait-panel {
 	display: none;
@@ -48,7 +50,7 @@ BODY {
 	padding: 12px;
 }
 .input-text {
-	width: calc(100vw - 24px);
+	width: calc(100% - 24px);
 	background-color: #000000;
 	border-radius: 0;
 	border: none;
@@ -56,7 +58,7 @@ BODY {
 	opacity: 0.6;
 }
 .input-btn {
-	width: calc(100vw - 24px);
+	width: calc(100% - 24px);
 	background-color: #ffffff;
 	color: #000000;
 }
