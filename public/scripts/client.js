@@ -15,7 +15,7 @@
 		fieldOfView: 60,
 		cameraOrbitRadius: 5,
 		planetRadius: 1,
-		asteroidSpawnForce: 1000000
+		asteroidSpawnForce: 100
 	};
 	
 	// Globals
@@ -36,7 +36,7 @@
 	var planet = new Physijs.BoxMesh(
 		new THREE.BoxGeometry(1, 1, 1),
 		new THREE.MeshNormalMaterial(),
-		1
+		0
 	);	
 			
 	// GUI
@@ -86,7 +86,7 @@
 		}(),
 		initScene: function() {
 			scenes.game = new Physijs.Scene();
-			scenes.game.setGravity(new THREE.Vector3( 0, -30, 0 ));
+			scenes.game.setGravity(new THREE.Vector3( 0, 0, 0 ));
 			// init planet
 			scenes.game.add( planet );
 			socket.on("simulation-frame", function(data) {
