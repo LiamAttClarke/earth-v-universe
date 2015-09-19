@@ -100,15 +100,7 @@
 		// fire projectile
 		fire: function(event) {
 			var touch = event.touches[0];
-			var screenPoint = new THREE.Vector3(
-				touch.screenX / window.innerWidth * 2 - 1,
-				-(touch.screenY / window.innerHeight * 2 - 1),
-				0.5
-			);
-			screenPoint.unproject( camera );
-			/*function screen2WorldPoint() {
-				
-			}*/
+			var spawnPos = screen2WorldPoint(touch.screenX, touch.screenY);
 			var asteroid = new Physijs.SphereMesh(
 				asteroidObject.geometry,
 				asteroidObject.material,
@@ -116,7 +108,7 @@
 			);
 			scenes.game.add( asteroid );
 			asteroid.__dirtyPosition = true;
-			asteroid.position.set(screenPoint.x, screenPoint.y, screenPoint.z);
+			asteroid.position = spawnPos;
 		}
 	};
 	var defender = {
@@ -276,6 +268,15 @@
 				guiPanels[panel].style.display = 'none';
 			}
 		}
+	}
+	
+	function screen2WorldPoint(screenX, screenY) {
+		var vect = new THREE.Vector3(
+			screenX / window.innerWidth * 2 - 1,
+			-(screenY / window.innerHeight * 2 - 1),
+			0.5
+		);
+		return vect.unproject( camera );
 	}
 	
 	// Debugging
