@@ -105,8 +105,8 @@
 				-(touch.screenY / window.innerHeight * 2 - 1),
 				2
 			);
-			debug(screenPoint.x + ", " + screenPoint.y);
 			screenPoint.unproject( camera );
+			debug(screenPoint.x + ", " + screenPoint.y);
 			var asteroid = new Physijs.SphereMesh(
 				asteroidObject.geometry,
 				asteroidObject.material,
