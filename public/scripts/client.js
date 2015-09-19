@@ -34,7 +34,7 @@
 	
 	// Game Scene Objects
 	var planet = new Physijs.BoxMesh(
-		new THREE.BoxGeometry(1, 1, 1),
+		new THREE.CubeGeometry(1, 1, 1),
 		new THREE.MeshNormalMaterial(),
 		1
 	);	
@@ -95,7 +95,7 @@
 		},
 		// fire projectile
 		fire: function(event) {
-			/*var asteroid = new Physijs.SphereMesh(
+			var asteroid = new Physijs.SphereMesh(
 				asteroidObject.geometry,
 				asteroidObject.material,
 				1
