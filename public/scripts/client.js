@@ -145,12 +145,12 @@
 		// window resize event
 		window.addEventListener('resize', function() {
 			camera.aspect = window.innerWidth / window.innerHeight;
-			camera.updateProjectionMatrix();
 			renderer.setSize( window.innerWidth, window.innerHeight );
 			if(currentScene === scenes.menu) {
 				updateLogoPos();
 				updateZoom();
 			}
+			camera.updateProjectionMatrix();
 		}, false);
 		// Device orientation event
 		window.addEventListener('deviceorientation', function(event) {
@@ -167,9 +167,10 @@
 	function initMenu() {
 		// set GUI
 		setActivePanel('menu');
-		// update logo position
+		// update logo position / camera zoom
 		updateLogoPos();
 		updateZoom();
+		camera.updateProjectionMatrix();
 		// init menu scene
 		currentScene = scenes.menu;
 		initSkyBox(scenes.menu);
@@ -236,7 +237,7 @@
 			currentScene.simulate();
 			socket.emit('simulation-frame', gameState);
 		} else if(currentScene === scenes.menu) {
-			camera.position.add( (new THREE.Vector3(0.25, 0, 0)).applyQuaternion( camera.quaternion ) );
+			camera.position.add( (new THREE.Vector3(0.15, 0, 0)).applyQuaternion( camera.quaternion ) );
 		}
 		renderer.render( currentScene, camera ); 		
 		// limit framerate
