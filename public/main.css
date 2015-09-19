@@ -15,7 +15,7 @@ canvas {
 }
 #opponent-name {
 	display: inline-block;
-	position: fixed;
+	position: absolute;
 	top: 4px;
 	left: 4px;
 	padding: 6px;
@@ -50,7 +50,7 @@ canvas {
 	display: none;
 }
 .panel {
-	position: fixed;
+	position: absolute;
 	width: 100%;
 	height: 100%;
 }
