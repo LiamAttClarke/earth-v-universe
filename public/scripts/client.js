@@ -209,6 +209,9 @@
 		window.addEventListener('click', function(event) {
 			player.fire(event);
 		});
+		window.addEventListener('touch', function(event) {
+			player.fire(event);
+		});
 	}
 	
 	/*----------------------
