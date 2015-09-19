@@ -43562,7 +43562,7 @@ if (typeof exports !== 'undefined') {
 		fieldOfView: 60,
 		cameraOrbitRadius: 5,
 		planetRadius: 1,
-		asteroidSpawnForce: 10
+		asteroidSpawnForce: 1
 	};
 	
 	// Globals
@@ -43642,16 +43642,19 @@ if (typeof exports !== 'undefined') {
 		},
 		// fire projectile
 		fire: function(event) {
+			var screenPoint = new THREE.Vector3(
+				event.screenX / window.innerWidth * 2 - 1,
+				-(event.screenY / window.innerHeight * 2 - 1),
+				0.5
+			);
+			screenPoint.unproject( camera );
 			var asteroid = new Physijs.SphereMesh(
 				asteroidObject.geometry,
 				asteroidObject.material,
 				1
 			);
 			scenes.game.add( asteroid );
-			asteroid.position.set(0, 0, 1);
-			var force = new THREE.Vector3(0, 0, settings.asteroidSpawnForce);
-			asteroid.applyCentralImpulse(force);
-			//gameState.asteroids.push( asteroid );*/
+			asteroid.position.set(screenPoint.x, screenPoint.y, screenPoint.z);
 		}
 	};
 	var defender = {
