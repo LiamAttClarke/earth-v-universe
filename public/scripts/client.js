@@ -108,7 +108,7 @@
 			);
 			scenes.game.add( asteroid );
 			asteroid.__dirtyPosition = true;
-			asteroid.copy( spawnPos );
+			asteroid.position.copy( spawnPos );
 		}
 	};
 	var defender = {
