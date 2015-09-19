@@ -43647,12 +43647,12 @@ if (typeof exports !== 'undefined') {
 		// fire projectile
 		fire: function(event) {
 			var touch = event.touches[0];
-			debug(touch.screenX);
 			var screenPoint = new THREE.Vector3(
 				touch.screenX / window.innerWidth * 2 - 1,
 				-(touch.screenY / window.innerHeight * 2 - 1),
-				0.5
+				2
 			);
+			debug(screenPoint.x + ", " + screenPoint.y);
 			screenPoint.unproject( camera );
 			var asteroid = new Physijs.SphereMesh(
 				asteroidObject.geometry,
