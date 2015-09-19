@@ -3,8 +3,8 @@
 	// Dependencies
 	var THREE = require('three');
 	var Physijs = require('physijs-browserify')(THREE);
-	Physijs.scripts.worker = 'scripts/physi-worker.js';
-	Physijs.scripts.ammo = 'scripts/ammo.js';
+	Physijs.scripts.worker = '/libs/physi-worker.js';
+	Physijs.scripts.ammo = '/libs/ammo.js';
 	// Networking
 	var io = require('socket.io-client');
 	var socket = io.connect('https://romjam-liamattclarke.rhcloud.com:8443', {'forceNew':true});
