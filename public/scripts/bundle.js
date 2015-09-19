@@ -43694,6 +43694,9 @@ if (typeof exports !== 'undefined') {
 			camera.aspect = window.innerWidth / window.innerHeight;
 			camera.updateProjectionMatrix();
 			renderer.setSize( window.innerWidth, window.innerHeight );
+			if(currentScene === scenes.menu) {
+				updateLogoPos();
+			}
 		}, false);
 		// Device orientation event
 		window.addEventListener('deviceorientation', function(event) {
@@ -43710,10 +43713,17 @@ if (typeof exports !== 'undefined') {
 	function initMenu() {
 		// set GUI
 		setActivePanel('menu');
+		// update logo position
+		updateLogoPos();
 		// init menu scene
 		currentScene = scenes.menu;
 		initSkyBox(scenes.menu);
-		player = defender;
+		player = attacker;
+		var asteroid = new THREE.Mesh(
+			asteroidObject.geometry,
+			asteroidObject.material
+		);
+		currentScene.add( asteroid );
 		// begin render vindaloop
 		update();
 	}
@@ -43751,7 +43761,7 @@ if (typeof exports !== 'undefined') {
 		// set current scene
 		currentScene = scenes.game;
 		// init Skybox
-		initSkyBox(scenes.game);
+		initSkyBox(currentScene);
 		// fire projectile
 		window.addEventListener('touchstart', function(event) {
 			event.preventDefault();
@@ -43768,7 +43778,7 @@ if (typeof exports !== 'undefined') {
 		player.updateOrientation();
 		// Render Scene
 		if(currentScene === scenes.game && isHost) {
-			scenes.game.simulate();
+			currentScene.simulate();
 			socket.emit('simulation-frame', gameState);
 		}
 		renderer.render( currentScene, camera ); 		
@@ -43816,6 +43826,12 @@ if (typeof exports !== 'undefined') {
 				guiPanels[panel].style.display = 'none';
 			}
 		}
+	}
+	
+	// centre logo
+	function updateLogoPos() {
+		var logo = document.getElementById('logo');
+		logo.style.marginTop = (window.innerHeight / 2) - (logo.clientHeight / 2) + 'px';
 	}
 	
 	function screen2WorldPoint(screenX, screenY) {
