@@ -43720,7 +43720,7 @@ if (typeof exports !== 'undefined') {
 		initSkyBox(scenes.menu);
 		player = attacker;
 		var asteroid = new THREE.Mesh(
-			asteroidObject.geometry,
+			new THREE.BoxGeometry(1,1,1),
 			asteroidObject.material
 		);
 		currentScene.add( asteroid );
