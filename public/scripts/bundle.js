@@ -43554,8 +43554,8 @@ if (typeof exports !== 'undefined') {
 	Physijs.scripts.ammo = '/scripts/ammo.js';
 	// Networking
 	var io = require('socket.io-client');
-	var socket = io.connect('https://romjam-liamattclarke.rhcloud.com:8443', {'forceNew':true});
-	//var socket = io(); // local testing
+	//var socket = io.connect('https://romjam-liamattclarke.rhcloud.com:8443', {'forceNew':true});
+	var socket = io(); // local testing
 	
 	// Settings
 	var settings = {
@@ -43563,7 +43563,7 @@ if (typeof exports !== 'undefined') {
 		fieldOfView: 60,
 		cameraOrbitRadius: 5,
 		planetRadius: 1,
-		asteroidSpawnForce: 1
+		asteroidSpawnForce: 10
 	};
 	
 	// Globals
@@ -43637,7 +43637,6 @@ if (typeof exports !== 'undefined') {
 		}(),
 		initScene: function() {
 			scenes.game = new Physijs.Scene();
-			scenes.game.setGravity(new THREE.Vector3( 0, 0, 0 ));
 			// init planet
 			scenes.game.add( planet );
 			socket.on("simulation-frame", function(data) {
@@ -43656,6 +43655,8 @@ if (typeof exports !== 'undefined') {
 			scenes.game.add( asteroid );
 			asteroid.__dirtyPosition = true;
 			asteroid.position.copy( spawnPos );
+			var dir = spawnPos.sub( camera.position ).normalized();
+			asteroid.applyCentralImpulse( dir * settings.asteroidSpawnForce );
 		}
 	};
 	var defender = {
@@ -43739,7 +43740,7 @@ if (typeof exports !== 'undefined') {
 	}
 	
 	/*-------------------
-		GAME SCENE
+		INIT GAME SCENE
 	-------------------*/
 	
 	function initGame() {

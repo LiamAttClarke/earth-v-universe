@@ -11,6 +11,7 @@
 		<span class="app-message">LOADING...</span>
 	</div>
 	<div id="menu-panel" class="panel">
+		<div id="logo"></div>
 		<div id="menu">
 			<input id="input-name" class="input input-text" type="text" placeholder="NAME" maxlength="16" style="text-transform:uppercase"/>
 			<div id="play-btn" class="input input-btn">START</div>
@@ -24,5 +25,17 @@
 	</div>
 	<div id="debug"></div><!-- TO BE REMOVED -->
 </body>
+<script>
+	// centre logo
+	window.onload = function() {
+		window.addEventListener('resize', updateLogoMargin);
+		var logo = document.getElementById('logo');
+		function updateLogoMargin() {
+			logo.style.marginTop = (window.innerHeight / 2) - (logo.clientHeight / 2) + 'px';
+			console.log(logo.clientHeight);
+		}
+		updateLogoMargin();
+	};
+</script>
 <script src="scripts/bundle.js"></script>
 </html>
