@@ -7,8 +7,8 @@
 	Physijs.scripts.ammo = '/scripts/ammo.js';
 	// Networking
 	var io = require('socket.io-client');
-	//var socket = io.connect('https://romjam-liamattclarke.rhcloud.com:8443', {'forceNew':true});
-	var socket = io(); // local testing
+	var socket = io.connect('https://romjam-liamattclarke.rhcloud.com:8443', {'forceNew':true});
+	//var socket = io(); // local testing
 	
 	// Settings
 	var settings = {
@@ -29,7 +29,7 @@
 	
 	// Prefab Objects
 	var asteroidObject = {
-		geometry: new THREE.SphereGeometry(0.1, 8, 8),
+		geometry: new THREE.SphereGeometry(1, 12, 12),
 		material: new THREE.MeshNormalMaterial()
 	};
 	
@@ -233,6 +233,8 @@
 		if(currentScene === scenes.game && isHost) {
 			currentScene.simulate();
 			socket.emit('simulation-frame', gameState);
+		} else if(currentScene === scenes.menu) {
+			camera.position.add( (new THREE.Vector3(1, 0, 0)).applyQuaternion( camera.quaternion ) );
 		}
 		renderer.render( currentScene, camera ); 		
 		// limit framerate

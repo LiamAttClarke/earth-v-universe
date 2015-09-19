@@ -3,6 +3,11 @@ BODY {
 	font-family: sans-serif;
 	color: #ffffff;
 }
+#wrapper {
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+}
 #opponent-name {
 	display: inline-block;
 	position: fixed;
