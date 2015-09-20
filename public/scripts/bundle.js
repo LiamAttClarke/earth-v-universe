@@ -43563,7 +43563,7 @@ if (typeof exports !== 'undefined') {
 		fieldOfView: 60,
 		cameraOrbitRadius: 5,
 		planetRadius: 1,
-		asteroidSpawnForce: 1000000
+		asteroidSpawnForce: 100
 	};
 	
 	// Globals
@@ -43659,6 +43659,7 @@ if (typeof exports !== 'undefined') {
 			asteroid.position.copy( spawnPos );
 			var dir = spawnPos.sub( camera.position ).normalized();
 			asteroid.applyCentralImpulse( dir * settings.asteroidSpawnForce );
+			debug(dir.x + " " + dir.y + " " + dir.z);
 		}
 	};
 	var defender = {
