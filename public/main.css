@@ -85,5 +85,7 @@ canvas {
 #debug {
 	color: #ff0000;
 	position: fixed;
+	top: 0;
+	left: 0;
 	font-size: 2em;
 }
