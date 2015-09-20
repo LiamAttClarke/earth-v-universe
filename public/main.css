@@ -3,7 +3,25 @@ BODY {
 	height: 100%;
 	margin: 0;
 	font-family: sans-serif;
-	color: #ffffff;
+}
+::-webkit-input-placeholder {
+   color: #000000;
+   font-family: sans-serif;
+}
+
+:-moz-placeholder { /* Firefox 18- */
+   color: #000000;  
+   font-family: sans-serif;
+}
+
+::-moz-placeholder {  /* Firefox 19+ */
+   color: #000000;  
+   font-family: sans-serif;
+}
+
+:-ms-input-placeholder {  
+   color: #000000;  
+   font-family: sans-serif;
 }
 canvas {
 	display: block;
@@ -12,15 +30,6 @@ canvas {
 	width: 100%;
 	height: 100%;
 	overflow: hidden;
-}
-#opponent-name {
-	display: inline-block;
-	position: absolute;
-	top: 4px;
-	left: 4px;
-	padding: 6px;
-	background-color: #000000;
-	opacity: 0.6;
 }
 #load-panel {
 	display: inline;
@@ -38,7 +47,7 @@ canvas {
 #logo {
 	width: calc(100% - 32px);
 	padding-top: 38.5%;
-	margin-left: 16px;
+	margin: 16px 0 0 16px;
 	background: url('assets/gui/logo.png') no-repeat;
 	background-size: 100%;
 }
@@ -68,15 +77,16 @@ canvas {
 }
 .input-text {
 	width: calc(100% - 24px);
-	background-color: #000000;
+	background-color: #f1c40f;
 	border-radius: 0;
 	border: none;
-	color: #ffffff;	
-	opacity: 0.6;
+	color: #000000;	
+	opacity: 0.8;
+	font-family: sans-serif;
 }
 .input-btn {
 	width: calc(100% - 24px);
-	background-color: #ffffff;
+	background-color: #f1c40f;
 	color: #000000;
 }
 #debug {

@@ -43697,7 +43697,6 @@ if (typeof exports !== 'undefined') {
 			camera.aspect = window.innerWidth / window.innerHeight;
 			renderer.setSize( window.innerWidth, window.innerHeight );
 			if(currentScene === scenes.menu) {
-				updateLogoPos();
 				updateZoom();
 			}
 			camera.updateProjectionMatrix();
@@ -43718,7 +43717,6 @@ if (typeof exports !== 'undefined') {
 		// set GUI
 		setActivePanel('menu');
 		// update logo position / camera zoom
-		updateLogoPos();
 		updateZoom();
 		camera.updateProjectionMatrix();
 		// init menu scene
@@ -43787,7 +43785,7 @@ if (typeof exports !== 'undefined') {
 			currentScene.simulate();
 			socket.emit('simulation-frame', gameState);
 		} else if(currentScene === scenes.menu) {
-			camera.position.add( (new THREE.Vector3(0.15, 0, 0)).applyQuaternion( camera.quaternion ) );
+			camera.position.add( (new THREE.Vector3(0.15, -2.3, 0)).applyQuaternion( camera.quaternion ) );
 		}
 		renderer.render( currentScene, camera ); 		
 		// limit framerate
@@ -43834,12 +43832,6 @@ if (typeof exports !== 'undefined') {
 				guiPanels[panel].style.display = 'none';
 			}
 		}
-	}
-	
-	// centre logo
-	function updateLogoPos() {
-		var logo = document.getElementById('logo');
-		logo.style.marginTop = (window.innerHeight / 2) - (logo.clientHeight / 2) + 'px';
 	}
 	
 	function updateZoom() {
