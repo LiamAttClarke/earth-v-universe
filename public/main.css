@@ -79,9 +79,6 @@ canvas {
 	background-color: #ffffff;
 	color: #000000;
 }
-.no-show {
-	display: none !important;
-}
 #debug {
 	color: #ff0000;
 	position: fixed;
