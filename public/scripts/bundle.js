@@ -43563,7 +43563,7 @@ if (typeof exports !== 'undefined') {
 		fieldOfView: 60,
 		cameraOrbitRadius: 5,
 		planetRadius: 1,
-		asteroidSpawnForce: 100
+		asteroidSpawnForce: 1000000
 	};
 	
 	// Globals
