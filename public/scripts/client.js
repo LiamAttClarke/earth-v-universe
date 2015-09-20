@@ -16,7 +16,7 @@
 		fieldOfView: 60,
 		cameraOrbitRadius: 5,
 		planetRadius: 1,
-		asteroidSpawnForce: 10
+		asteroidSpawnForce: 100
 	};
 	
 	// Globals
@@ -92,6 +92,8 @@
 			scenes.game = new Physijs.Scene();
 			// init planet
 			scenes.game.add( planet );
+			// disable default gravity
+			scenes.game.setGravity( new THREE.Vector3(0,0,0) );
 			socket.on("simulation-frame", function(data) {
 				gameState = data;
 			});
