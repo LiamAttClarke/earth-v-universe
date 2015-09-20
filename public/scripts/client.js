@@ -29,7 +29,7 @@
 	
 	// Prefab Objects
 	var asteroidObject = {
-		geometry: new THREE.SphereGeometry(1, 12, 12),
+		geometry: new THREE.SphereGeometry(0.1, 12, 12),
 		material: new THREE.MeshNormalMaterial()
 	};
 	
