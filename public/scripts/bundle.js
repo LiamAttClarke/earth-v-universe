@@ -43559,7 +43559,7 @@ if (typeof exports !== 'undefined') {
 	
 	// Settings
 	var settings = {
-		frameRate: 30,
+		frameRate: 60,
 		fieldOfView: 60,
 		cameraOrbitRadius: 5,
 		planetRadius: 1,
