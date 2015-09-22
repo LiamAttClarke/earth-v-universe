@@ -43554,8 +43554,8 @@ if (typeof exports !== 'undefined') {
 	Physijs.scripts.ammo = '/scripts/ammo.js';
 	// Networking
 	var io = require('socket.io-client');
-	var socket = io.connect('https://romjam-liamattclarke.rhcloud.com:8443', {'forceNew':true});
-	//var socket = io(); // local testing
+	//var socket = io.connect('https://romjam-liamattclarke.rhcloud.com:8443', {'forceNew':true});
+	var socket = io(); // local testing
 	
 	// Settings
 	var settings = {
@@ -43697,8 +43697,10 @@ if (typeof exports !== 'undefined') {
 			camera.aspect = window.innerWidth / window.innerHeight;
 			renderer.setSize( window.innerWidth, window.innerHeight );
 			if(currentScene === scenes.menu) {
+				updateLogoPos();
 				updateZoom();
 			}
+			camera.fov = camera.aspect * settings.fieldOfView + 45;
 			camera.updateProjectionMatrix();
 		}, false);
 		// Device orientation event
@@ -43717,6 +43719,7 @@ if (typeof exports !== 'undefined') {
 		// set GUI
 		setActivePanel('menu');
 		// update logo position / camera zoom
+		updateLogoPos();
 		updateZoom();
 		camera.updateProjectionMatrix();
 		// init menu scene
@@ -43785,7 +43788,7 @@ if (typeof exports !== 'undefined') {
 			currentScene.simulate();
 			socket.emit('simulation-frame', gameState);
 		} else if(currentScene === scenes.menu) {
-			camera.position.add( (new THREE.Vector3(0.15, -2.3, 0)).applyQuaternion( camera.quaternion ) );
+			camera.position.add( (new THREE.Vector3(0.1, 0, 0)).applyQuaternion( camera.quaternion ) );
 		}
 		renderer.render( currentScene, camera ); 		
 		// limit framerate
@@ -43832,6 +43835,12 @@ if (typeof exports !== 'undefined') {
 				guiPanels[panel].style.display = 'none';
 			}
 		}
+	}
+	
+	// centre logo
+	function updateLogoPos() {
+		var logo = document.getElementById('romLogo');
+		logo.style.marginTop = (window.innerHeight / 2) - (logo.clientHeight / 2) + 'px';
 	}
 	
 	function updateZoom() {

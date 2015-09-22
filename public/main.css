@@ -44,7 +44,7 @@ canvas {
 	left: 16px;
 	bottom: 16px;
 }
-#logo {
+#romLogo {
 	width: calc(100% - 32px);
 	padding-top: 38.5%;
 	margin: 16px 0 0 16px;

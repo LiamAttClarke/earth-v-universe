@@ -150,8 +150,10 @@
 			camera.aspect = window.innerWidth / window.innerHeight;
 			renderer.setSize( window.innerWidth, window.innerHeight );
 			if(currentScene === scenes.menu) {
+				updateLogoPos();
 				updateZoom();
 			}
+			camera.fov = camera.aspect * settings.fieldOfView + 45;
 			camera.updateProjectionMatrix();
 		}, false);
 		// Device orientation event
@@ -170,6 +172,7 @@
 		// set GUI
 		setActivePanel('menu');
 		// update logo position / camera zoom
+		updateLogoPos();
 		updateZoom();
 		camera.updateProjectionMatrix();
 		// init menu scene
@@ -238,7 +241,7 @@
 			currentScene.simulate();
 			socket.emit('simulation-frame', gameState);
 		} else if(currentScene === scenes.menu) {
-			camera.position.add( (new THREE.Vector3(0.15, -2.3, 0)).applyQuaternion( camera.quaternion ) );
+			camera.position.add( (new THREE.Vector3(0.1, 0, 0)).applyQuaternion( camera.quaternion ) );
 		}
 		renderer.render( currentScene, camera ); 		
 		// limit framerate
@@ -285,6 +288,12 @@
 				guiPanels[panel].style.display = 'none';
 			}
 		}
+	}
+	
+	// centre logo
+	function updateLogoPos() {
+		var logo = document.getElementById('romLogo');
+		logo.style.marginTop = (window.innerHeight / 2) - (logo.clientHeight / 2) + 'px';
 	}
 	
 	function updateZoom() {
