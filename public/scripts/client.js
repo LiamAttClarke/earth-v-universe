@@ -7,8 +7,8 @@
 	Physijs.scripts.ammo = '/scripts/ammo.js';
 	// Networking
 	var io = require('socket.io-client');
-	var socket = io.connect('https://romjam-liamattclarke.rhcloud.com:8443', {'forceNew':true});
-	//var socket = io(); // local testing
+	//var socket = io.connect('https://romjam-liamattclarke.rhcloud.com:8443', {'forceNew':true});
+	var socket = io(); // local testing
 	
 	// Settings
 	var settings = {
@@ -16,7 +16,7 @@
 		fieldOfView: 60,
 		cameraOrbitRadius: 5,
 		planetRadius: 1,
-		asteroidSpawnForce: 100
+		asteroidSpawnForce: 5
 	};
 	
 	// Globals
@@ -49,10 +49,12 @@
 	};
 	var inputName = document.getElementById('input-name');
 	var playBtn = document.getElementById('play-btn');
+	// Start Button
+	playBtn.addEventListener('click', findMatch, false);
 	playBtn.addEventListener('touchstart', function(event) {
 		event.preventDefault();
 		findMatch();
-	});
+	}, false);
 	
 	// Device Orientation
 	var applyDeviceOrientation = function() {
@@ -99,9 +101,8 @@
 			});
 		},
 		// fire projectile
-		fire: function(event) {
-			var touch = event.touches[0];
-			var spawnPos = screen2WorldPoint(touch.screenX, touch.screenY);
+		fire: function(screenX, screenY) {
+			var spawnPos = screen2WorldPoint(screenX, screenY);
 			var asteroid = new Physijs.SphereMesh(
 				asteroidObject.geometry,
 				asteroidObject.material,
@@ -110,9 +111,8 @@
 			scenes.game.add( asteroid );
 			asteroid.__dirtyPosition = true;
 			asteroid.position.copy( spawnPos );
-			var dir = spawnPos.sub( camera.position ).normalized();
-			asteroid.applyCentralImpulse( dir * settings.asteroidSpawnForce );
-			debug(dir.x + " " + dir.y + " " + dir.z);
+			var dir = spawnPos.sub( camera.position ).normalize();
+			asteroid.applyCentralImpulse( dir.multiplyScalar( settings.asteroidSpawnForce ) );
 		}
 	};
 	var defender = {
@@ -153,7 +153,7 @@
 				updateLogoPos();
 				updateZoom();
 			}
-			camera.fov = camera.aspect * settings.fieldOfView + 45;
+			//camera.fov = camera.aspect * settings.fieldOfView + 45;
 			camera.updateProjectionMatrix();
 		}, false);
 		// Device orientation event
@@ -223,9 +223,13 @@
 		// init Skybox
 		initSkyBox(currentScene);
 		// fire projectile
+		window.addEventListener('click', function(event) {
+			player.fire(event.screenX, event.screenY);
+		}, false);
 		window.addEventListener('touchstart', function(event) {
 			event.preventDefault();
-			player.fire(event);
+			var touch = event.touches[0];
+			player.fire(touch.screenX, touch.screenY);
 		}, false);
 	}
 	
