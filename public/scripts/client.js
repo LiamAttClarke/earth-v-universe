@@ -200,7 +200,9 @@
 		// start match
 		socket.on('start-match', function(data) {
 			socket.on('player-disconnected', function() {
-				setActivePanel('wait');
+				socket.emit('leave-room');
+				currentScene = scenes.menu;
+				setActivePanel('menu');
 			});
 			isHost = data.isHost;
 			if(isHost) player = attacker;

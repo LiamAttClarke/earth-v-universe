@@ -27,32 +27,14 @@ function Room(id) {
 
 // new connection event
 io.sockets.on('connection', function(socket) {
-	console.log(socket.id + ' - connected');
 	var room;
-	// connection lost event
-	socket.on('disconnect', function() {
-		console.log(socket.id + ' - disconnected');
-		// leave room
-		if(room) {
-			leaveRoom(socket, room);
-			io.sockets.to(room.name).emit('player-disconnected');
-		}
-		// remove last room if empty
-		if(rooms.length > 0) {
-			if(rooms[rooms.length - 1].players.length === 0) {
-				rooms.pop();
-				roomCounter--;
-			}
-		}
-	});
 	// user requests matchmaking
 	socket.on('find-match', function() {
 		console.log(socket.id + ' - started match');
-		room = joinOrCreateRoom(socket.id);
+		room = findOrCreateRoom(socket.id);
 		socket.join(room.name);
+		console.log(socket.id + ' - ' + room.name + ", Room Count: " + roomCounter);
 		// set host of match
-		console.log(socket.id + ' - ' + room.name);
-		console.log('Room Count = ' + rooms.length);
 		if(room.players.length === 2) {
 			// start match
 			if(room.players[0] === socket.id) {
@@ -67,11 +49,23 @@ io.sockets.on('connection', function(socket) {
 				socket.broadcast.to(room.name).emit('simulation-frame', data);
 			});	
 		}
+		// connection lost event
+		socket.on('disconnect', function() {
+			console.log(socket.id + ' - connection lost');
+			// leave room
+			leaveRoom( socket, room );
+		});
+		// player leaves room
+		socket.on('leave-room', function() {
+			console.log(socket.id + ' - left room');
+			// leave room
+			leaveRoom( socket, room );
+		});
 	});
 });
 
 // searches for open rooms to join or creates new room
-function joinOrCreateRoom(clientId) {
+function findOrCreateRoom(clientId) {
 	var firstAvailableRoom = rooms.filter(function(room) { return room.players.length === 1; })[0];
 	if(!firstAvailableRoom) {
 		var newRoom = new Room(clientId);
@@ -84,6 +78,15 @@ function joinOrCreateRoom(clientId) {
 
 // remove socket from room then remove room if empty
 function leaveRoom(socket, room) {
+	if(!room) return;
+	io.sockets.to(room.name).emit('player-disconnected');
 	socket.leave(room.name);
 	room.players.splice(room.players.indexOf(socket.id), 1);
+	// remove last room if empty
+	if(rooms.length > 0) {
+		if(rooms[rooms.length - 1].players.length === 0) {
+			rooms.pop();
+			roomCounter--;
+		}
+	}
 }
