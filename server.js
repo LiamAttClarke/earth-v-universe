@@ -79,7 +79,7 @@ function findOrCreateRoom(clientId) {
 // remove socket from room then remove room if empty
 function leaveRoom(socket, room) {
 	if(!room) return;
-	io.sockets.to(room.name).emit('player-disconnected');
+	io.sockets.to(room.name).emit('player-disconnected'); // not working : <
 	socket.leave(room.name);
 	room.players.splice(room.players.indexOf(socket.id), 1);
 	// remove last room if empty

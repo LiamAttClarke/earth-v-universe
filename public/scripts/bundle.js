@@ -43554,20 +43554,20 @@ if (typeof exports !== 'undefined') {
 	Physijs.scripts.ammo = '/scripts/ammo.js';
 	// Networking
 	var io = require('socket.io-client');
-	var socket = io.connect('https://romjam-liamattclarke.rhcloud.com:8443', {'forceNew':true});
-	//var socket = io(); // local testing
+	//var socket = io.connect('https://romjam-liamattclarke.rhcloud.com:8443', {'forceNew':true});
+	var socket = io(); // local testing
 	
 	// Settings
 	var settings = {
 		frameRate: 60,
-		fieldOfView: 60,
-		cameraOrbitRadius: 5,
+		fieldOfView: 30,
+		cameraOrbitRadius: 6,
 		planetRadius: 1,
-		asteroidSpawnForce: 5
+		asteroidSpawnForce: 1
 	};
 	
 	// Globals
-	var camera, renderer, currentScene, isHost;
+	var camera, renderer, currentScene, isHost, tanFOV, initialHeight;
 	var scenes = {};
 	var deviceData = {};
 	var gameState = {
@@ -43596,6 +43596,9 @@ if (typeof exports !== 'undefined') {
 	};
 	var inputName = document.getElementById('input-name');
 	var playBtn = document.getElementById('play-btn');
+	var menu = document.getElementById('menu');
+	var logo = document.getElementById('romLogo');
+	
 	// Start Button
 	playBtn.addEventListener('click', findMatch, false);
 	playBtn.addEventListener('touchstart', function(event) {
@@ -43686,23 +43689,17 @@ if (typeof exports !== 'undefined') {
 	(function initApp() {
 		// init Scenes
 		scenes.menu = new THREE.Scene();
+		currentScene = scenes.menu;
 		// init Camera
 		camera = new THREE.PerspectiveCamera(settings.fieldOfView, window.innerWidth / window.innerHeight, 0.1, 1000);
+		tanFOV = Math.tan( THREE.Math.degToRad( camera.fov / 2 ) );
+		initialHeight = window.innerHeight;
 		// init Renderer
 		renderer = new THREE.WebGLRenderer({antialias:true});
-		renderer.setSize( window.innerWidth, window.innerHeight ); 
 		document.body.appendChild( renderer.domElement );
 		// window resize event
-		window.addEventListener('resize', function() {
-			camera.aspect = window.innerWidth / window.innerHeight;
-			renderer.setSize( window.innerWidth, window.innerHeight );
-			if(currentScene === scenes.menu) {
-				updateLogoPos();
-				updateZoom();
-			}
-			//camera.fov = camera.aspect * settings.fieldOfView + 45;
-			camera.updateProjectionMatrix();
-		}, false);
+		window.addEventListener('resize', onResizeEvent, false);
+		onResizeEvent();
 		// Device orientation event
 		window.addEventListener('deviceorientation', function(event) {
 			deviceData = event;
@@ -43718,16 +43715,12 @@ if (typeof exports !== 'undefined') {
 	function initMenu() {
 		// set GUI
 		setActivePanel('menu');
-		// update logo position / camera zoom
-		updateLogoPos();
-		updateZoom();
-		camera.updateProjectionMatrix();
 		// init menu scene
 		currentScene = scenes.menu;
 		initSkyBox(scenes.menu);
 		player = attacker;
 		var asteroid = new THREE.Mesh(
-			new THREE.BoxGeometry(1,1,1),
+			new THREE.SphereGeometry(1, 16, 16),
 			asteroidObject.material
 		);
 		currentScene.add( asteroid );
@@ -43773,7 +43766,7 @@ if (typeof exports !== 'undefined') {
 		initSkyBox(currentScene);
 		// fire projectile
 		window.addEventListener('click', function(event) {
-			player.fire(event.screenX, event.screenY);
+			player.fire(event.clientX, event.clientY);
 		}, false);
 		window.addEventListener('touchstart', function(event) {
 			event.preventDefault();
@@ -43789,13 +43782,12 @@ if (typeof exports !== 'undefined') {
 	function update() {
 		// player orientation
 		player.updateOrientation();
-		// Render Scene
+		// simulate physics
 		if(currentScene === scenes.game && isHost) {
 			currentScene.simulate();
 			socket.emit('simulation-frame', gameState);
-		} else if(currentScene === scenes.menu) {
-			camera.position.add( (new THREE.Vector3(0.1, 0, 0)).applyQuaternion( camera.quaternion ) );
 		}
+		// Render Scene
 		renderer.render( currentScene, camera ); 		
 		// limit framerate
 		setTimeout( function() {
@@ -43843,14 +43835,14 @@ if (typeof exports !== 'undefined') {
 		}
 	}
 	
-	// centre logo
-	function updateLogoPos() {
-		var logo = document.getElementById('romLogo');
-		logo.style.marginTop = (window.innerHeight / 2) - (logo.clientHeight / 2) + 'px';
-	}
-	
-	function updateZoom() {
-		camera.zoom = window.innerWidth / 500;
+	function onResizeEvent() {
+		camera.aspect = window.innerWidth / window.innerHeight;
+		renderer.setSize( window.innerWidth, window.innerHeight );
+		camera.fov = (36000 / Math.PI) * Math.atan( THREE.Math.degToRad( tanFOV * (window.innerHeight / initialHeight) ) );
+		if(currentScene === scenes.menu) {
+			menu.style.marginTop = (window.innerHeight / 2) - (logo.clientHeight / 2) + 'px';
+		}
+		camera.updateProjectionMatrix();
 	}
 	
 	function screen2WorldPoint(screenX, screenY) {
