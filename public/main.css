@@ -39,16 +39,16 @@ canvas {
 	display: none;
 }
 #menu {
-	width: calc(100% - 32px);
-	max-width: 512px;
-	margin: 0 auto 0 auto;
+	position: relative;
+	width: 100%;
+	height: 100%;
 }
 #romLogo {
-	width: 100%;
-	margin-bottom: 16px;
-	padding-top: 38.5%;
-	background: url('assets/gui/logo.png') no-repeat;
-	background-size: 100%;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 512px;
 }
 #wait-panel {
 	display: none;
@@ -70,6 +70,8 @@ canvas {
 	color: #ffffff;
 }
 .input {
+	display: none;
+	position: fixed;
 	height: 30px;
 	text-align: center;
 	font-size: 1.5em;

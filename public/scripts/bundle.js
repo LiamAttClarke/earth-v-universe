@@ -43546,7 +43546,7 @@ if (typeof exports !== 'undefined') {
 
 },{}],53:[function(require,module,exports){
 'strict';
-(function() {
+window.onload = function() {
 	// Dependencies
 	var THREE = require('three');
 	var Physijs = require('physijs-browserify')(THREE);
@@ -43561,7 +43561,7 @@ if (typeof exports !== 'undefined') {
 	var settings = {
 		frameRate: 60,
 		fieldOfView: 30,
-		cameraOrbitRadius: 6,
+		cameraOrbitRadius: 8,
 		planetRadius: 1,
 		asteroidSpawnForce: 1
 	};
@@ -43598,7 +43598,6 @@ if (typeof exports !== 'undefined') {
 	var playBtn = document.getElementById('play-btn');
 	var menu = document.getElementById('menu');
 	var logo = document.getElementById('romLogo');
-	
 	// Start Button
 	playBtn.addEventListener('click', findMatch, false);
 	playBtn.addEventListener('touchstart', function(event) {
@@ -43640,16 +43639,6 @@ if (typeof exports !== 'undefined') {
 				applyDeviceOrientation( camera.quaternion, alpha, beta, gamma, orient );
 			}
 		}(),
-		initScene: function() {
-			scenes.game = new Physijs.Scene();
-			// init planet
-			scenes.game.add( planet );
-			// disable default gravity
-			scenes.game.setGravity( new THREE.Vector3(0,0,0) );
-			socket.on("simulation-frame", function(data) {
-				gameState = data;
-			});
-		},
 		// fire projectile
 		fire: function(screenX, screenY) {
 			var spawnPos = screen2WorldPoint(screenX, screenY);
@@ -43673,9 +43662,6 @@ if (typeof exports !== 'undefined') {
 			var orient = window.orientation ? THREE.Math.degToRad( window.orientation ) : 0; // Orientation
 			applyDeviceOrientation( camera.quaternion, alpha, beta, gamma, orient );
 		},
-		initScene: function() {
-			scenes.game = new THREE.Scene();
-		},
 		fire: function() {
 			// fire projectile
 		}
@@ -43687,9 +43673,6 @@ if (typeof exports !== 'undefined') {
 	
 	// called before start
 	(function initApp() {
-		// init Scenes
-		scenes.menu = new THREE.Scene();
-		currentScene = scenes.menu;
 		// init Camera
 		camera = new THREE.PerspectiveCamera(settings.fieldOfView, window.innerWidth / window.innerHeight, 0.1, 1000);
 		tanFOV = Math.tan( THREE.Math.degToRad( camera.fov / 2 ) );
@@ -43716,6 +43699,7 @@ if (typeof exports !== 'undefined') {
 		// set GUI
 		setActivePanel('menu');
 		// init menu scene
+		scenes.menu = new THREE.Scene();
 		currentScene = scenes.menu;
 		initSkyBox(scenes.menu);
 		player = attacker;
@@ -43759,7 +43743,18 @@ if (typeof exports !== 'undefined') {
 		// set GUI
 		setActivePanel('game');
 		// init player scene
-		player.initScene();
+		if(player == attacker) {
+			scenes.game = new Physijs.Scene();
+			// init planet
+			scenes.game.add( planet );
+			// disable default gravity
+			scenes.game.setGravity( new THREE.Vector3(0,0,0) );
+			socket.on("simulation-frame", function(data) {
+				gameState = data;
+			});
+		} else {
+			scenes.game = new THREE.Scene();
+		}
 		// set current scene
 		currentScene = scenes.game;
 		// init Skybox
@@ -43839,9 +43834,6 @@ if (typeof exports !== 'undefined') {
 		camera.aspect = window.innerWidth / window.innerHeight;
 		renderer.setSize( window.innerWidth, window.innerHeight );
 		camera.fov = (36000 / Math.PI) * Math.atan( THREE.Math.degToRad( tanFOV * (window.innerHeight / initialHeight) ) );
-		if(currentScene === scenes.menu) {
-			menu.style.marginTop = (window.innerHeight / 2) - (logo.clientHeight / 2) + 'px';
-		}
 		camera.updateProjectionMatrix();
 	}
 	
@@ -43860,5 +43852,5 @@ if (typeof exports !== 'undefined') {
 		console.log(stringValue);
 		debugElement.innerHTML = stringValue;
 	}
-})();
+};
 },{"physijs-browserify":1,"socket.io-client":2,"three":52}]},{},[53]);
