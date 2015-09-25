@@ -43834,6 +43834,9 @@ window.onload = function() {
 		camera.aspect = window.innerWidth / window.innerHeight;
 		renderer.setSize( window.innerWidth, window.innerHeight );
 		camera.fov = (36000 / Math.PI) * Math.atan( THREE.Math.degToRad( tanFOV * (window.innerHeight / initialHeight) ) );
+		if(window.innerWidth < 544) {
+			camera.zoom = lerp(0.0, 1.0, window.innerWidth / 544);
+		}
 		camera.updateProjectionMatrix();
 	}
 	
@@ -43844,6 +43847,10 @@ window.onload = function() {
 			0.5
 		);
 		return vect.unproject( camera );
+	}
+	
+	function lerp(value1, value2, alpha) {
+		return value1 + (value2 - value1) * alpha;
 	}
 	
 	// Debugging

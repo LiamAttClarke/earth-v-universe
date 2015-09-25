@@ -89,7 +89,6 @@ canvas {
 .input-btn {
 	width: calc(100% - 64px);
 	color: #000000;
-	border: solid 4px #ffffff;
 }
 #debug {
 	color: #ff0000;
