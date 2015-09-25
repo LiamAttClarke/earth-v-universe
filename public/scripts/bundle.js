@@ -43567,7 +43567,8 @@ window.onload = function() {
 	};
 	
 	// Globals
-	var camera, renderer, currentScene, isHost, tanFOV, initialHeight;
+	var camera, renderer, currentScene, isHost, tanFOV, initialZoom;
+	var initialHeight = 640;
 	var scenes = {};
 	var deviceData = {};
 	var gameState = {
@@ -43676,7 +43677,8 @@ window.onload = function() {
 		// init Camera
 		camera = new THREE.PerspectiveCamera(settings.fieldOfView, window.innerWidth / window.innerHeight, 0.1, 1000);
 		tanFOV = Math.tan( THREE.Math.degToRad( camera.fov / 2 ) );
-		initialHeight = window.innerHeight;
+		camera.zoom = 1.0;
+		initialZoom = camera.zoom;
 		// init Renderer
 		renderer = new THREE.WebGLRenderer({antialias:true});
 		document.body.appendChild( renderer.domElement );
@@ -43835,7 +43837,7 @@ window.onload = function() {
 		renderer.setSize( window.innerWidth, window.innerHeight );
 		camera.fov = (36000 / Math.PI) * Math.atan( THREE.Math.degToRad( tanFOV * (window.innerHeight / initialHeight) ) );
 		if(window.innerWidth < 544) {
-			camera.zoom = lerp(0.0, 1.0, window.innerWidth / 544);
+			camera.zoom = lerp(0.0, initialZoom, window.innerWidth / 544);
 		}
 		camera.updateProjectionMatrix();
 	}
