@@ -43792,14 +43792,14 @@ window.onload = function() {
 	
 	// Skybox
 	function initSkyBox(scene) {
-		var urlPrefix = 'assets/textures/skybox/space/';
+		var urlPrefix = 'assets/textures/skybox/';
 		var cubeMapFaces = [
-			urlPrefix + '2.png',
-			urlPrefix + '3.png',
-			urlPrefix + '1.png',
-			urlPrefix + '6.png',
-			urlPrefix + '4.png',
-			urlPrefix + '5.png'
+			urlPrefix + 'spaceLF.png',
+			urlPrefix + 'spaceFT.png',
+			urlPrefix + 'spaceUP.png',
+			urlPrefix + 'spaceDN.png',
+			urlPrefix + 'spaceRT.png',
+			urlPrefix + 'spaceBK.png'
 		];
 		var textureCube = THREE.ImageUtils.loadTextureCube(cubeMapFaces);
 		var skyShader = THREE.ShaderLib[ 'cube' ];

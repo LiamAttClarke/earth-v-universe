@@ -48,7 +48,8 @@ canvas {
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, -50%);
-	width: 512px;
+	width: calc(100% - 32px);
+	max-width: 512px;
 }
 #wait-panel {
 	display: none;
@@ -70,26 +71,25 @@ canvas {
 	color: #ffffff;
 }
 .input {
-	display: none;
-	position: fixed;
 	height: 30px;
 	text-align: center;
 	font-size: 1.5em;
 	padding: 12px;
+	margin-left: auto;
+	margin-right: auto;
 }
 .input-text {
-	width: calc(100% - 24px);
-	background-color: #ffffff;
+	display: none;
+	width: calc(100% - 32px);
 	border-radius: 0;
 	border: none;
 	color: #000000;	
-	opacity: 0.66;
 	font-family: sans-serif;
 }
 .input-btn {
-	width: calc(100% - 24px);
-	background-color: #ffffff;
+	width: calc(100% - 64px);
 	color: #000000;
+	border: solid 4px #ffffff;
 }
 #debug {
 	color: #ff0000;
