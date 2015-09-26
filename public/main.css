@@ -51,6 +51,24 @@ canvas {
 	width: calc(100% - 32px);
 	max-width: 512px;
 }
+.input {
+	height: 30px;
+	text-align: center;
+	font-size: 1.5em;
+	padding: 12px;
+}
+.input-text {
+	width: calc(100% - 32px);
+	border-radius: 0;
+	border: none;
+	color: #000000;	
+	font-family: sans-serif;
+	background-color: #fff;
+}
+.input-btn {
+	width: calc(100% - 64px);
+	color: #000000;
+}
 #wait-panel {
 	display: none;
 	background-color: #000000;
@@ -69,26 +87,6 @@ canvas {
 	margin-top: 50vh;
 	text-align: center;
 	color: #ffffff;
-}
-.input {
-	height: 30px;
-	text-align: center;
-	font-size: 1.5em;
-	padding: 12px;
-	margin-left: auto;
-	margin-right: auto;
-}
-.input-text {
-	display: none;
-	width: calc(100% - 32px);
-	border-radius: 0;
-	border: none;
-	color: #000000;	
-	font-family: sans-serif;
-}
-.input-btn {
-	width: calc(100% - 64px);
-	color: #000000;
 }
 #debug {
 	color: #ff0000;

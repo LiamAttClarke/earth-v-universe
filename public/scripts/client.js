@@ -7,8 +7,8 @@ window.onload = function() {
 	Physijs.scripts.ammo = '/scripts/ammo.js';
 	// Networking
 	var io = require('socket.io-client');
-	var socket = io.connect('https://romjam-liamattclarke.rhcloud.com:8443', {'forceNew':true});
-	//var socket = io(); // local testing
+	//var socket = io.connect('https://romjam-liamattclarke.rhcloud.com:8443', {'forceNew':true});
+	var socket = io(); // local testing
 	
 	// Settings
 	var settings = {
@@ -130,7 +130,7 @@ window.onload = function() {
 		// init Camera
 		camera = new THREE.PerspectiveCamera(settings.fieldOfView, window.innerWidth / window.innerHeight, 0.1, 1000);
 		tanFOV = Math.tan( THREE.Math.degToRad( camera.fov / 2 ) );
-		camera.zoom = 1.0;
+		camera.zoom = 1.0; // this might be wrong...
 		initialZoom = camera.zoom;
 		// init Renderer
 		renderer = new THREE.WebGLRenderer({antialias:true});
