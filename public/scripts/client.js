@@ -7,8 +7,8 @@ window.onload = function() {
 	Physijs.scripts.ammo = '/scripts/ammo.js';
 	// Networking
 	var io = require('socket.io-client');
-	//var socket = io.connect('https://romjam-liamattclarke.rhcloud.com:8443', {'forceNew':true});
-	var socket = io(); // local testing
+	var socket = io.connect('https://romjam-liamattclarke.rhcloud.com:8443', {'forceNew':true});
+	//var socket = io(); // local testing
 	
 	// Settings
 	var settings = {
@@ -48,7 +48,7 @@ window.onload = function() {
 		wait: document.getElementById('wait-panel'),
 		game: document.getElementById('game-panel')
 	};
-	var inputName = document.getElementById('input-name');
+	var inputName = document.getElementById('name-input');
 	var playBtn = document.getElementById('play-btn');
 	var menu = document.getElementById('menu');
 	var logo = document.getElementById('romLogo');

@@ -43,7 +43,7 @@ canvas {
 	width: 100%;
 	height: 100%;
 }
-#romLogo {
+#centered-div {
 	position: absolute;
 	top: 50%;
 	left: 50%;
@@ -51,23 +51,51 @@ canvas {
 	width: calc(100% - 32px);
 	max-width: 512px;
 }
-.input {
-	height: 30px;
-	text-align: center;
+#title {
+	display: flex;
+	justify-content: center; /* align horizontal */
+	align-items: center; /* align vertical */
+	margin-bottom: 16px;
+	height: 40px;
 	font-size: 1.5em;
 	padding: 12px;
+	color: #ffffff;
+	font-size: 2em;
 }
-.input-text {
-	width: calc(100% - 32px);
-	border-radius: 0;
+#romLogo {
+	display: block;
+	width: 100%;
+	margin-bottom: 16px;
+}
+#input-wrapper {
+	height: 52px;
+	padding: 6px;
+	background-color: #ffffff;
+	border-radius: 6px;
+	overflow: auto;
+}
+#name-input {
+	float: left;
 	border: none;
-	color: #000000;	
-	font-family: sans-serif;
-	background-color: #fff;
+	border-bottom: solid 4px #000000;
+	height: 36px;
+	width: calc(100% - 168px);
+	margin: 6px 0 0 6px;
+	text-align: center;
+	font-size: 1.5em;
 }
-.input-btn {
-	width: calc(100% - 64px);
-	color: #000000;
+#play-btn {
+	display: flex;
+	justify-content: center; /* align horizontal */
+	align-items: center; /* align vertical */
+	width: 150px;
+	height: 52px;
+	float: right;
+	background-color: #2488EA;
+	border-radius: 6px;
+	color: #ffffff;
+	font-size: 1.5em;
+	cursor: pointer;
 }
 #wait-panel {
 	display: none;
@@ -82,9 +110,7 @@ canvas {
 	height: 100%;
 }
 .app-message {
-	display: block;
 	width: 100%;
-	margin-top: 50vh;
 	text-align: center;
 	color: #ffffff;
 }
