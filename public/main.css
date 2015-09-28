@@ -61,7 +61,7 @@ canvas {
 	-webkit-align-items: baseline;
 	    -ms-flex-align: baseline;
 	        align-items: baseline; /* align vertical */
-	margin-bottom: 8px;
+	margin-bottom: 16px;
 	height: 30px;
 	font-size: 2em;
 	padding: 12px;
@@ -71,7 +71,7 @@ canvas {
 #romLogo {
 	display: block;
 	width: 100%;
-	margin-bottom: 8px;
+	margin-bottom: 16px;
 }
 #input-wrapper {
 	display: -webkit-box;

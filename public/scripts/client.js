@@ -50,8 +50,6 @@ window.onload = function() {
 	};
 	var inputName = document.getElementById('name-input');
 	var playBtn = document.getElementById('play-btn');
-	var menu = document.getElementById('menu');
-	var logo = document.getElementById('romLogo');
 	// Start Button
 	playBtn.addEventListener('click', findMatch, false);
 	playBtn.addEventListener('touchstart', function(event) {
@@ -136,6 +134,10 @@ window.onload = function() {
 		document.body.appendChild( renderer.domElement );
 		// window resize event
 		window.addEventListener('resize', onResizeEvent, false);
+		window.addEventListener('orientationchange', function() {
+			onResizeEvent();
+			debug(screen.orientation);
+		}, false);
 		onResizeEvent();
 		// Device orientation event
 		window.addEventListener('deviceorientation', function(event) {
