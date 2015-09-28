@@ -74,18 +74,25 @@ canvas {
 	margin-bottom: 8px;
 }
 #input-wrapper {
+	display: -webkit-box;
+	display: -webkit-flex;
+	display: -ms-flexbox;
+	display: flex;
+	-webkit-box-align: center;
+	-webkit-align-items: center;
+	    -ms-flex-align: center;
+	        align-items: center;
 	height: 42px;
 	padding: 6px;
 	background-color: #ffffff;
 	border-radius: 6px;
 }
 #name-input {
-	width: 100px;
-	border: none;
-	margin: 0;
+	width: 60%;
 	font-size: 1.5em;
 }
 #play-btn {
+	margin-left: auto;
 	display: -webkit-box;
 	display: -webkit-flex;
 	display: -ms-flexbox;
@@ -100,7 +107,6 @@ canvas {
 	        align-items: center; /* align vertical */
 	width: 100px;
 	height: 42px;
-	float: right;
 	background-color: #2488EA;
 	border-radius: 6px;
 	color: #ffffff;
