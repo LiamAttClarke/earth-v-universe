@@ -7,8 +7,8 @@ window.onload = function() {
 	Physijs.scripts.ammo = '/scripts/ammo.js';
 	// Networking
 	var io = require('socket.io-client');
-	//var socket = io.connect('https://romjam-liamattclarke.rhcloud.com:8443', {'forceNew':true});
-	var socket = io(); // local testing
+	var socket = io.connect('https://romjam-liamattclarke.rhcloud.com:8443', {'forceNew':true});
+	//var socket = io(); // local testing
 	
 	// Settings
 	var settings = {
@@ -27,6 +27,7 @@ window.onload = function() {
 	var gameState = {
 		asteroids: {}
 	}
+	var asteroids = {};
 	function Asteroid(name, position, rotation) {
 		this.name = name;
 		this.position = position;
@@ -99,20 +100,22 @@ window.onload = function() {
 		}(),
 		// fire projectile
 		fire: function(screenX, screenY) {
-			var spawnPos = screen2WorldPoint(screenX, screenY);
 			var asteroid = new Physijs.SphereMesh(
 				asteroidPrefab.geometry,
 				asteroidPrefab.material,
 				1
 			);
+			var spawnPos = screen2WorldPoint(screenX, screenY);
+			var fireDir = spawnPos.sub( camera.position ).normalize();
 			scenes.game.add( asteroid );
 			asteroid.__dirtyPosition = true;
 			asteroid.position.copy( spawnPos );
-			var dir = spawnPos.sub( camera.position ).normalize();
-			asteroid.applyCentralImpulse( dir.multiplyScalar( settings.asteroidSpawnForce ) );
+			asteroid.applyCentralImpulse( fireDir.multiplyScalar( settings.asteroidSpawnForce ) );		
 			// create new asteroid object and pass it into gameState.asteroids
-			var newAsteroid = new Asteroid('asteroid' + asteroidCount++, asteroid.position, asteroid.rotation);
+			var asteroidName = 'asteroid' + asteroidCount++;
+			var newAsteroid = new Asteroid(asteroidName, asteroid.position, asteroid.rotation);
 			gameState.asteroids[ newAsteroid.name ] = newAsteroid;
+			asteroids[ asteroidName ] = asteroid;
 		}
 	};
 	var defender = {
@@ -143,10 +146,10 @@ window.onload = function() {
 		document.body.appendChild( renderer.domElement );
 		// window resize event
 		window.addEventListener('resize', onResizeEvent, false);
-		window.addEventListener('orientationchange', function() {
+		/*window.addEventListener('orientationchange', function() {
 			onResizeEvent();
 			debug(window.orientation);
-		}, false);
+		}, false);*/
 		onResizeEvent();
 		// Device orientation event
 		window.addEventListener('deviceorientation', function(event) {
@@ -208,17 +211,17 @@ window.onload = function() {
 		// set GUI
 		setActivePanel('game');
 		// init player scene
-		if(player == attacker) {
+		if(player === attacker) {
 			scenes.game = new Physijs.Scene();
 			// init planet
 			scenes.game.add( planet );
 			// disable default gravity
 			scenes.game.setGravity( new THREE.Vector3(0,0,0) );
+		} else {
+			scenes.game = new THREE.Scene();
 			socket.on("simulation-frame", function(data) {
 				gameState = data;
 			});
-		} else {
-			scenes.game = new THREE.Scene();
 		}
 		// set current scene
 		currentScene = scenes.game;
@@ -246,6 +249,12 @@ window.onload = function() {
 		if(currentScene === scenes.game) {
 			if(isHost) {
 				currentScene.simulate();
+				for(var asteroidName in asteroids) {
+					var asteroid = asteroids[asteroidName];
+					var gameStateAsteroid = gameState.asteroids[ asteroidName ];
+					gameStateAsteroid.position = asteroid.position;
+					gameStateAsteroid.rotation = asteroid.rotation;
+				}
 				socket.emit('simulation-frame', gameState);
 			} else {
 				for(var asteroidName in gameState.asteroids) {

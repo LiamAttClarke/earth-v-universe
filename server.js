@@ -44,11 +44,12 @@ io.sockets.on('connection', function(socket) {
 				socket.emit('start-match', { isHost: false });
 				socket.broadcast.to(room.name).emit('start-match', { isHost: true });
 			}
-			// emit simulation frames to all non-host players in room
-			socket.on('simulation-frame', function(data) {
-				socket.broadcast.to(room.name).emit('simulation-frame', data);
-			});	
 		}
+		// emit simulation frames to all non-host players in room
+		socket.on('simulation-frame', function(data) {
+			console.log("simulation-frame recieved");
+			socket.broadcast.to(room.name).emit('simulation-frame', data);
+		});
 		// connection lost event
 		socket.on('disconnect', function() {
 			console.log(socket.id + ' - connection lost');
