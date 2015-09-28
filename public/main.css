@@ -80,9 +80,9 @@ canvas {
 	border-radius: 6px;
 }
 #name-input {
-	width: calc(100% - 118px);
+	width: 100px;
 	border: none;
-	margin: 6px 0 0 0;
+	margin: 0;
 	font-size: 1.5em;
 }
 #play-btn {
