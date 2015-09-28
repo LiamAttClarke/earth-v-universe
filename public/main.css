@@ -87,13 +87,13 @@ canvas {
 	outline: none;
 	margin-top: 6px;
 	font-size: 1.5em;
-	float: left;
 }
 #play-btn {
 	display: -webkit-box;
 	display: -webkit-flex;
 	display: -ms-flexbox;
 	display: flex;
+	display: none;
 	-webkit-box-pack: center;
 	-webkit-justify-content: center;
 	    -ms-flex-pack: center;
