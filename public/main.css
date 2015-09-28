@@ -88,8 +88,17 @@ canvas {
 	border-radius: 6px;
 }
 #name-input {
-	width: 60%;
+	-webkit-box-flex: 1;
+	-webkit-flex-grow: 1;
+	    -ms-flex-positive: 1;
+	        flex-grow: 1;
+	height: 38px;
 	font-size: 1.5em;
+	border: solid 1px #999999;
+	border-radius: 6px;
+	outline: 0;
+	padding: 0 0 0 6px;
+	margin: 0 6px 0 0;
 }
 #play-btn {
 	margin-left: auto;
@@ -105,7 +114,7 @@ canvas {
 	-webkit-align-items: center;
 	    -ms-flex-align: center;
 	        align-items: center; /* align vertical */
-	width: 100px;
+	width: 40%;
 	height: 42px;
 	background-color: #2488EA;
 	border-radius: 6px;
