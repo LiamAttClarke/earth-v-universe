@@ -80,6 +80,7 @@ canvas {
 	border-radius: 6px;
 }
 #name-input {
+	-webkit-appearance: none; 
 	border: none;
 	height: 30px;
 	width: calc(100% - 128px);
