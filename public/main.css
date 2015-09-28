@@ -80,19 +80,19 @@ canvas {
 	border-radius: 6px;
 }
 #name-input {
-	display: inline-block;
 	border: none;
 	height: 30px;
 	width: calc(100% - 118px);
 	margin: 6px 0 0 6px;
 	text-align: center;
 	font-size: 1.5em;
+	float: left;
 }
 #play-btn {
-	display: -webkit-inline-box;
-	display: -webkit-inline-flex;
-	display: -ms-inline-flexbox;
-	display: inline-flex;
+	display: -webkit-box;
+	display: -webkit-flex;
+	display: -ms-flexbox;
+	display: flex;
 	-webkit-box-pack: center;
 	-webkit-justify-content: center;
 	    -ms-flex-pack: center;

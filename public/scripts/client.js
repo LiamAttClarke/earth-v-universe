@@ -290,6 +290,8 @@ window.onload = function() {
 		camera.fov = (36000 / Math.PI) * Math.atan( THREE.Math.degToRad( tanFOV * (window.innerHeight / initialHeight) ) );
 		if(window.innerWidth < 544) {
 			camera.zoom = lerp(0.0, initialZoom, window.innerWidth / 544);
+		} else {
+			camera.zoom = initialZoom;
 		}
 		camera.updateProjectionMatrix();
 	}
