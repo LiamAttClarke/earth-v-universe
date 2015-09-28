@@ -8,17 +8,14 @@ BODY {
    color: #666666;
    font-family: sans-serif;
 }
-
 :-moz-placeholder { /* Firefox 18- */
    color: #666666;  
    font-family: sans-serif;
 }
-
 ::-moz-placeholder {  /* Firefox 19+ */
    color: #666666;  
    font-family: sans-serif;
 }
-
 :-ms-input-placeholder {  
    color: #666666;  
    font-family: sans-serif;
@@ -119,13 +116,15 @@ canvas {
 	-webkit-align-items: center;
 	    -ms-flex-align: center;
 	        align-items: center; /* align vertical */
-	height: 42px;
+	height: 38px;
 	background-color: #2488EA;
 	border-radius: 6px;
+	border-bottom: solid 4px #0266c8;
 	color: #ffffff;
 	font-size: 1.5em;
 	cursor: pointer;
 }
+#play-btn:active { background-color: #0266c8; }
 #wait-panel {
 	display: none;
 	background-color: #000000;

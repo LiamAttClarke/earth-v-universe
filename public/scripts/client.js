@@ -7,8 +7,8 @@ window.onload = function() {
 	Physijs.scripts.ammo = '/scripts/ammo.js';
 	// Networking
 	var io = require('socket.io-client');
-	var socket = io.connect('https://romjam-liamattclarke.rhcloud.com:8443', {'forceNew':true});
-	//var socket = io(); // local testing
+	//var socket = io.connect('https://romjam-liamattclarke.rhcloud.com:8443', {'forceNew':true});
+	var socket = io(); // local testing
 	
 	// Settings
 	var settings = {
@@ -25,11 +25,17 @@ window.onload = function() {
 	var scenes = {};
 	var deviceData = {};
 	var gameState = {
-		asteroids: []
+		asteroids: {}
 	}
+	function Asteroid(name, position, rotation) {
+		this.name = name;
+		this.position = position;
+		this.rotation = rotation;
+	}
+	var asteroidCount = 0;
 	
 	// Prefab Objects
-	var asteroidObject = {
+	var asteroidPrefab = {
 		geometry: new THREE.SphereGeometry(0.1, 12, 12),
 		material: new THREE.MeshNormalMaterial()
 	};
@@ -95,8 +101,8 @@ window.onload = function() {
 		fire: function(screenX, screenY) {
 			var spawnPos = screen2WorldPoint(screenX, screenY);
 			var asteroid = new Physijs.SphereMesh(
-				asteroidObject.geometry,
-				asteroidObject.material,
+				asteroidPrefab.geometry,
+				asteroidPrefab.material,
 				1
 			);
 			scenes.game.add( asteroid );
@@ -104,6 +110,9 @@ window.onload = function() {
 			asteroid.position.copy( spawnPos );
 			var dir = spawnPos.sub( camera.position ).normalize();
 			asteroid.applyCentralImpulse( dir.multiplyScalar( settings.asteroidSpawnForce ) );
+			// create new asteroid object and pass it into gameState.asteroids
+			var newAsteroid = new Asteroid('asteroid' + asteroidCount++, asteroid.position, asteroid.rotation);
+			gameState.asteroids[ newAsteroid.name ] = newAsteroid;
 		}
 	};
 	var defender = {
@@ -136,7 +145,7 @@ window.onload = function() {
 		window.addEventListener('resize', onResizeEvent, false);
 		window.addEventListener('orientationchange', function() {
 			onResizeEvent();
-			debug(screen.orientation);
+			debug(window.orientation);
 		}, false);
 		onResizeEvent();
 		// Device orientation event
@@ -161,7 +170,7 @@ window.onload = function() {
 		player = attacker;
 		var asteroid = new THREE.Mesh(
 			new THREE.SphereGeometry(1, 16, 16),
-			asteroidObject.material
+			asteroidPrefab.material
 		);
 		currentScene.add( asteroid );
 		// begin render vindaloop
@@ -234,9 +243,28 @@ window.onload = function() {
 		// player orientation
 		player.updateOrientation();
 		// simulate physics
-		if(currentScene === scenes.game && isHost) {
-			currentScene.simulate();
-			socket.emit('simulation-frame', gameState);
+		if(currentScene === scenes.game) {
+			if(isHost) {
+				currentScene.simulate();
+				socket.emit('simulation-frame', gameState);
+			} else {
+				for(var asteroidName in gameState.asteroids) {
+					var asteroid = gameState.asteroids[asteroidName];
+					var spawnedAsteroid = currentScene.getObjectByName( asteroid );
+					if( spawnedAsteroid ) {
+						spawnedAsteroid.position.copy( asteroid.position );
+						spawnedAsteroid.rotation.copy( asteroid.rotation );
+					} else {
+						var newAsteroid = new THREE.Mesh(
+							asteroidPrefab.geometry,
+							asteroidPrefab.material
+						);
+						currentScene.add( newAsteroid );
+						newAsteroid.position.copy( asteroid.position );
+						newAsteroid.rotation.copy( asteroid.rotation );
+					}
+				}
+			}
 		}
 		// Render Scene
 		renderer.render( currentScene, camera ); 		
