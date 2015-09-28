@@ -55,8 +55,8 @@ canvas {
 	display: flex;
 	justify-content: center; /* align horizontal */
 	align-items: center; /* align vertical */
-	margin-bottom: 16px;
-	height: 40px;
+	margin-bottom: 8px;
+	height: 30px;
 	font-size: 1.5em;
 	padding: 12px;
 	color: #ffffff;
@@ -65,31 +65,29 @@ canvas {
 #romLogo {
 	display: block;
 	width: 100%;
-	margin-bottom: 16px;
+	margin-bottom: 8px;
 }
 #input-wrapper {
-	height: 52px;
+	height: 42px;
 	padding: 6px;
 	background-color: #ffffff;
 	border-radius: 6px;
-	overflow: auto;
 }
 #name-input {
-	float: left;
+	display: inline-block;
 	border: none;
-	min-width: 0;
-	height: 40px;
+	height: 30px;
 	width: calc(100% - 118px);
 	margin: 6px 0 0 6px;
 	text-align: center;
 	font-size: 1.5em;
 }
 #play-btn {
-	display: flex;
+	display: inline-flex;
 	justify-content: center; /* align horizontal */
 	align-items: center; /* align vertical */
 	width: 100px;
-	height: 52px;
+	height: 42px;
 	float: right;
 	background-color: #2488EA;
 	border-radius: 6px;

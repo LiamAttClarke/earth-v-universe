@@ -130,7 +130,6 @@ window.onload = function() {
 		// init Camera
 		camera = new THREE.PerspectiveCamera(settings.fieldOfView, window.innerWidth / window.innerHeight, 0.1, 1000);
 		tanFOV = Math.tan( THREE.Math.degToRad( camera.fov / 2 ) );
-		camera.zoom = 1.0; // this might be wrong...
 		initialZoom = camera.zoom;
 		// init Renderer
 		renderer = new THREE.WebGLRenderer({antialias:true});
