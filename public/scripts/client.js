@@ -29,10 +29,9 @@ window.onload = function() {
 		asteroids: {}
 	}
 	
-	function AsteroidObject(name, position, rotation) {
+	function AsteroidObject(name, position) {
 		this.name = name;
 		this.position = position;
-		this.rotation = rotation;
 	}
 	
 	// Prefab Objects
@@ -117,7 +116,7 @@ window.onload = function() {
 			// create new asteroid object and pass it into gameState.asteroids
 			var asteroidName = 'asteroid' + asteroidCounter++;
 			inGameAsteroids[ asteroidName ] = asteroid;
-			var asteroidObject = new AsteroidObject(asteroidName, asteroid.position, asteroid.rotation);
+			var asteroidObject = new AsteroidObject(asteroidName, asteroid.position);
 			gameState.asteroids[ asteroidName ] = asteroidObject;
 		}
 	};
@@ -255,7 +254,6 @@ window.onload = function() {
 						var gameStateAsteroid = gameState.asteroids[ inGameAsteroidName ];
 						var inGameAsteroid = inGameAsteroids[ inGameAsteroidName ];
 						gameStateAsteroid.position = inGameAsteroid.position;
-						gameStateAsteroid.rotation = inGameAsteroid.rotation;
 					}
 				})();
 				// emit gameState
@@ -267,7 +265,6 @@ window.onload = function() {
 						var inGameAsteroid = inGameAsteroids[ gameStateAsteroidName ];
 						if( inGameAsteroid ) {
 							inGameAsteroid.position.copy( gameStateAsteroid.position );
-							inGameAsteroid.rotation.copy( gameStateAsteroid.rotation );
 						} else {
 							var newAsteroid = new THREE.Mesh(
 								prefabs.asteroid.geometry,
@@ -276,7 +273,6 @@ window.onload = function() {
 							currentScene.add( newAsteroid );
 							newAsteroid.name = gameStateAsteroidName;
 							newAsteroid.position.copy( gameStateAsteroid.position );
-							newAsteroid.rotation.copy( gameStateAsteroid.rotation );
 							inGameAsteroids[ gameStateAsteroidName ] = newAsteroid;
 						}
 					}
