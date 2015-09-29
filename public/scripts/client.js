@@ -14,31 +14,30 @@ window.onload = function() {
 	var settings = {
 		frameRate: 60,
 		fieldOfView: 30,
-		cameraOrbitRadius: 8,
+		defenderOrbitRadius: 8,
 		planetRadius: 1,
-		asteroidSpawnForce: 1
+		asteroidSpawnForce: 1,
+		initialScreenHeight: 640
 	};
 	
 	// Globals
-	var camera, renderer, currentScene, isHost, tanFOV, initialZoom;
-	var initialHeight = 640;
+	var camera, renderer, currentScene, isHost, tanFOV, initialZoom, asteroidCounter;
 	var scenes = {};
 	var deviceData = {};
+	var inGameAsteroids = {};
 	var gameState = {
 		asteroids: {}
 	}
-	var asteroids = {};
-	function Asteroid(name, position, rotation) {
+	
+	function AsteroidObject(name, position, rotation) {
 		this.name = name;
 		this.position = position;
 		this.rotation = rotation;
 	}
-	var asteroidCount = 0;
 	
 	// Prefab Objects
-	var asteroidPrefab = {
-		geometry: new THREE.SphereGeometry(0.1, 12, 12),
-		material: new THREE.MeshNormalMaterial()
+	var prefabs = {
+		asteroid: { geometry: new THREE.SphereGeometry(0.1, 12, 12), material: new THREE.MeshNormalMaterial() }
 	};
 	
 	// Game Scene Objects
@@ -55,11 +54,11 @@ window.onload = function() {
 		wait: document.getElementById('wait-panel'),
 		game: document.getElementById('game-panel')
 	};
-	var inputName = document.getElementById('name-input');
+	//var inputName = document.getElementById('name-input');
 	var playBtn = document.getElementById('play-btn');
 	// Start Button
 	playBtn.addEventListener('click', findMatch, false);
-	playBtn.addEventListener('touchstart', function(event) {
+	playBtn.addEventListener('touchend', function(event) {
 		event.preventDefault();
 		findMatch();
 	}, false);
@@ -79,6 +78,20 @@ window.onload = function() {
 		};
 	}();
 	
+	var applyOrientation = function() {
+		var quaternion = new THREE.Quaternion();
+		return function(playerPosition) {
+			var alpha = deviceData.alpha ? THREE.Math.degToRad( deviceData.alpha ) : 0; // Z
+			var beta = deviceData.beta ? THREE.Math.degToRad( deviceData.beta ) : 0; // X
+			var gamma = deviceData.gamma ? THREE.Math.degToRad( deviceData.gamma ) : 0; // Y
+			var orient = window.orientation ? THREE.Math.degToRad( window.orientation ) : 0; // Orientation
+			applyDeviceOrientation( quaternion, alpha, beta, gamma, orient );
+			var pos = (new THREE.Vector3( 0, 0, playerPosition ) ).applyQuaternion( quaternion  );
+			camera.position.set(pos.x, pos.y, pos.z);
+			applyDeviceOrientation( camera.quaternion, alpha, beta, gamma, orient );
+		}
+	}();
+	
 	/*-------------
 		PLAYER
 	-------------*/
@@ -86,45 +99,31 @@ window.onload = function() {
 	var player;
 	var attacker = {
 		updateOrientation: function() {
-			var quaternion = new THREE.Quaternion();
-			return function() {
-				var alpha = deviceData.alpha ? THREE.Math.degToRad( deviceData.alpha ) : 0; // Z
-				var beta = deviceData.beta ? THREE.Math.degToRad( deviceData.beta ) : 0; // X
-				var gamma = deviceData.gamma ? THREE.Math.degToRad( deviceData.gamma ) : 0; // Y
-				var orient = window.orientation ? THREE.Math.degToRad( window.orientation ) : 0; // Orientation
-				applyDeviceOrientation( quaternion, alpha, beta, gamma, orient );
-				var pos = (new THREE.Vector3( 0, 0, settings.cameraOrbitRadius ) ).applyQuaternion( quaternion  );
-				camera.position.set(pos.x, pos.y, pos.z);
-				applyDeviceOrientation( camera.quaternion, alpha, beta, gamma, orient );
-			}
-		}(),
+			applyOrientation(settings.defenderOrbitRadius);
+		},
 		// fire projectile
 		fire: function(screenX, screenY) {
 			var asteroid = new Physijs.SphereMesh(
-				asteroidPrefab.geometry,
-				asteroidPrefab.material,
+				prefabs.asteroid.geometry,
+				prefabs.asteroid.material,
 				1
 			);
 			var spawnPos = screen2WorldPoint(screenX, screenY);
-			var fireDir = spawnPos.sub( camera.position ).normalize();
 			scenes.game.add( asteroid );
 			asteroid.__dirtyPosition = true;
 			asteroid.position.copy( spawnPos );
-			asteroid.applyCentralImpulse( fireDir.multiplyScalar( settings.asteroidSpawnForce ) );		
+			var fireDir = spawnPos.sub( camera.position ).normalize();
+			asteroid.applyCentralImpulse( fireDir.multiplyScalar( settings.asteroidSpawnForce ) );	
 			// create new asteroid object and pass it into gameState.asteroids
-			var asteroidName = 'asteroid' + asteroidCount++;
-			var newAsteroid = new Asteroid(asteroidName, asteroid.position, asteroid.rotation);
-			gameState.asteroids[ newAsteroid.name ] = newAsteroid;
-			asteroids[ asteroidName ] = asteroid;
+			var asteroidName = 'asteroid' + asteroidCounter++;
+			inGameAsteroids[ asteroidName ] = asteroid;
+			var asteroidObject = new AsteroidObject(asteroidName, asteroid.position, asteroid.rotation);
+			gameState.asteroids[ asteroidName ] = asteroidObject;
 		}
 	};
 	var defender = {
 		updateOrientation: function() {
-			var alpha = deviceData.alpha ? THREE.Math.degToRad( deviceData.alpha ) : 0; // Z
-			var beta = deviceData.beta ? THREE.Math.degToRad( deviceData.beta ) : 0; // X
-			var gamma = deviceData.gamma ? THREE.Math.degToRad( deviceData.gamma ) : 0; // Y
-			var orient = window.orientation ? THREE.Math.degToRad( window.orientation ) : 0; // Orientation
-			applyDeviceOrientation( camera.quaternion, alpha, beta, gamma, orient );
+			applyOrientation(-settings.planetRadius);
 		},
 		fire: function() {
 			// fire projectile
@@ -173,7 +172,7 @@ window.onload = function() {
 		player = attacker;
 		var asteroid = new THREE.Mesh(
 			new THREE.SphereGeometry(1, 16, 16),
-			asteroidPrefab.material
+			prefabs.asteroid.material
 		);
 		currentScene.add( asteroid );
 		// begin render vindaloop
@@ -208,6 +207,7 @@ window.onload = function() {
 	-------------------*/
 	
 	function initGame() {
+		asteroidCounter = 0;
 		// set GUI
 		setActivePanel('game');
 		// init player scene
@@ -249,30 +249,38 @@ window.onload = function() {
 		if(currentScene === scenes.game) {
 			if(isHost) {
 				currentScene.simulate();
-				for(var asteroidName in asteroids) {
-					var asteroid = asteroids[asteroidName];
-					var gameStateAsteroid = gameState.asteroids[ asteroidName ];
-					gameStateAsteroid.position = asteroid.position;
-					gameStateAsteroid.rotation = asteroid.rotation;
-				}
+				// update gameState
+				(function() {
+					for(var inGameAsteroidName in inGameAsteroids) {
+						var gameStateAsteroid = gameState.asteroids[ inGameAsteroidName ];
+						var inGameAsteroid = inGameAsteroids[ inGameAsteroidName ];
+						gameStateAsteroid.position = inGameAsteroid.position;
+						gameStateAsteroid.rotation = inGameAsteroid.rotation;
+					}
+				})();
+				// emit gameState
 				socket.emit('simulation-frame', gameState);
 			} else {
-				for(var asteroidName in gameState.asteroids) {
-					var asteroid = gameState.asteroids[asteroidName];
-					var spawnedAsteroid = currentScene.getObjectByName( asteroid );
-					if( spawnedAsteroid ) {
-						spawnedAsteroid.position.copy( asteroid.position );
-						spawnedAsteroid.rotation.copy( asteroid.rotation );
-					} else {
-						var newAsteroid = new THREE.Mesh(
-							asteroidPrefab.geometry,
-							asteroidPrefab.material
-						);
-						currentScene.add( newAsteroid );
-						newAsteroid.position.copy( asteroid.position );
-						newAsteroid.rotation.copy( asteroid.rotation );
+				(function() {
+					for(var gameStateAsteroidName in gameState.asteroids) {
+						var gameStateAsteroid = gameState.asteroids[ gameStateAsteroidName ];
+						var inGameAsteroid = inGameAsteroids[ gameStateAsteroidName ];
+						if( inGameAsteroid ) {
+							inGameAsteroid.position.copy( gameStateAsteroid.position );
+							inGameAsteroid.rotation.copy( gameStateAsteroid.rotation );
+						} else {
+							var newAsteroid = new THREE.Mesh(
+								prefabs.asteroid.geometry,
+								prefabs.asteroid.material
+							);
+							currentScene.add( newAsteroid );
+							newAsteroid.name = gameStateAsteroidName;
+							newAsteroid.position.copy( gameStateAsteroid.position );
+							newAsteroid.rotation.copy( gameStateAsteroid.rotation );
+							inGameAsteroids[ gameStateAsteroidName ] = newAsteroid;
+						}
 					}
-				}
+				})();
 			}
 		}
 		// Render Scene
@@ -326,7 +334,7 @@ window.onload = function() {
 	function onResizeEvent() {
 		camera.aspect = window.innerWidth / window.innerHeight;
 		renderer.setSize( window.innerWidth, window.innerHeight );
-		camera.fov = (36000 / Math.PI) * Math.atan( THREE.Math.degToRad( tanFOV * (window.innerHeight / initialHeight) ) );
+		camera.fov = (36000 / Math.PI) * Math.atan( THREE.Math.degToRad( tanFOV * (window.innerHeight / settings.initialScreenHeight) ) );
 		if(window.innerWidth < 544) {
 			camera.zoom = lerp(0.0, initialZoom, window.innerWidth / 544);
 		} else {

@@ -47,7 +47,6 @@ io.sockets.on('connection', function(socket) {
 		}
 		// emit simulation frames to all non-host players in room
 		socket.on('simulation-frame', function(data) {
-			console.log("simulation-frame recieved");
 			socket.broadcast.to(room.name).emit('simulation-frame', data);
 		});
 		// connection lost event
