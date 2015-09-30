@@ -1,14 +1,29 @@
+var HOST = process.env.OPENSHIFT_INTERNAL_IP || process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1';
+var PORT = process.env.OPENSHIFT_INTERNAL_PORT || process.env.OPENSHIFT_NODEJS_PORT || 1337;
+// TCP/IP
 var express = require('express');
 var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
-var PORT = process.env.OPENSHIFT_INTERNAL_PORT || process.env.OPENSHIFT_NODEJS_PORT || 1337;
-var IPADDRESS = process.env.OPENSHIFT_INTERNAL_IP || process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1';
 
-// open port for communication
-server.listen(PORT, IPADDRESS, function() {
-	console.log('Listening on ip: %s, on port: %d', IPADDRESS, PORT);
+// open TCP port for communication
+server.listen(PORT, HOST, function() {
+	console.log('TCP Server Listening on ' + HOST + ':' + PORT);
 });
+
+// UDP/IP
+/*var dgram = require('dgram');
+var UDPServer = dgram.createSocket('udp4');
+
+UDPServer.on('listening', function () {
+    var address = UDPServer.address();
+    console.log('UDP Server listening on ' + address.address + ":" + address.port);
+});
+UDPServer.on('message', function (message, remote) {
+    console.log(remote.address + ':' + remote.port +' - ' + message);
+
+});
+UDPServer.bind(PORT, HOST);*/
 
 //set static folder for application
 app.use(express.static('public'));

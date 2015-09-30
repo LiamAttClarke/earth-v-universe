@@ -6,6 +6,7 @@ window.onload = function() {
 	Physijs.scripts.worker = '/scripts/physi-worker.js';
 	Physijs.scripts.ammo = '/scripts/ammo.js';
 	// Networking
+	//var dgram = require('dgram');
 	var io = require('socket.io-client');
 	var socket = io.connect('https://romjam-liamattclarke.rhcloud.com:8443', {'forceNew':true});
 	//var socket = io(); // local testing
@@ -32,6 +33,12 @@ window.onload = function() {
 	function AsteroidObject(name, position) {
 		this.name = name;
 		this.position = position;
+	}
+	
+	function Position(position) {
+		this.x = position.x;
+		this.y = position.y;
+		this.z = position.z;
 	}
 	
 	// Prefab Objects
@@ -116,7 +123,8 @@ window.onload = function() {
 			// create new asteroid object and pass it into gameState.asteroids
 			var asteroidName = 'asteroid' + asteroidCounter++;
 			inGameAsteroids[ asteroidName ] = asteroid;
-			var asteroidObject = new AsteroidObject(asteroidName, asteroid.position);
+			var position = new Position(asteroid.position);
+			var asteroidObject = new AsteroidObject(asteroidName, position);
 			gameState.asteroids[ asteroidName ] = asteroidObject;
 		}
 	};
@@ -144,10 +152,6 @@ window.onload = function() {
 		document.body.appendChild( renderer.domElement );
 		// window resize event
 		window.addEventListener('resize', onResizeEvent, false);
-		/*window.addEventListener('orientationchange', function() {
-			onResizeEvent();
-			debug(window.orientation);
-		}, false);*/
 		onResizeEvent();
 		// Device orientation event
 		window.addEventListener('deviceorientation', function(event) {
@@ -253,7 +257,7 @@ window.onload = function() {
 					for(var inGameAsteroidName in inGameAsteroids) {
 						var gameStateAsteroid = gameState.asteroids[ inGameAsteroidName ];
 						var inGameAsteroid = inGameAsteroids[ inGameAsteroidName ];
-						gameStateAsteroid.position = inGameAsteroid.position;
+						gameStateAsteroid.position = new Position( inGameAsteroid.position );
 					}
 				})();
 				// emit gameState
@@ -263,8 +267,9 @@ window.onload = function() {
 					for(var gameStateAsteroidName in gameState.asteroids) {
 						var gameStateAsteroid = gameState.asteroids[ gameStateAsteroidName ];
 						var inGameAsteroid = inGameAsteroids[ gameStateAsteroidName ];
+						var gameStateAsteroidPos = gameStateAsteroid.position;
 						if( inGameAsteroid ) {
-							inGameAsteroid.position.copy( gameStateAsteroid.position );
+							inGameAsteroid.position.set(gameStateAsteroidPos.x, gameStateAsteroidPos.y, gameStateAsteroidPos.z);
 						} else {
 							var newAsteroid = new THREE.Mesh(
 								prefabs.asteroid.geometry,
@@ -272,7 +277,7 @@ window.onload = function() {
 							);
 							currentScene.add( newAsteroid );
 							newAsteroid.name = gameStateAsteroidName;
-							newAsteroid.position.copy( gameStateAsteroid.position );
+							newAsteroid.position.set(gameStateAsteroidPos.x, gameStateAsteroidPos.y, gameStateAsteroidPos.z);
 							inGameAsteroids[ gameStateAsteroidName ] = newAsteroid;
 						}
 					}
