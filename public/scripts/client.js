@@ -8,8 +8,8 @@ window.onload = function() {
 	// Networking
 	//var dgram = require('dgram');
 	var io = require('socket.io-client');
-	var socket = io.connect('https://romjam-liamattclarke.rhcloud.com:8443', {'forceNew':true});
-	//var socket = io(); // local testing
+	//var socket = io.connect('https://romjam-liamattclarke.rhcloud.com:8443', {'forceNew':true});
+	var socket = io(); // local testing
 	
 	// Settings
 	var settings = {
@@ -18,11 +18,15 @@ window.onload = function() {
 		defenderOrbitRadius: 8,
 		planetRadius: 1,
 		asteroidSpawnForce: 1,
-		initialScreenHeight: 640
+		initialScreenHeight: 640,
+		planetMass: 100000000,
+		asteroidMass: 100
+		
 	};
 	
 	// Globals
 	var camera, renderer, currentScene, isHost, tanFOV, initialZoom, asteroidCounter;
+	var GRAVITY_CONTSTANT = 0.0000000000667408;
 	var scenes = {};
 	var deviceData = {};
 	var inGameAsteroids = {};
@@ -262,6 +266,18 @@ window.onload = function() {
 				})();
 				// emit gameState
 				socket.emit('simulation-frame', gameState);
+				
+				// Force of Gravity
+				(function() {
+					for(var asteroidName in inGameAsteroids) {
+						var asteroid = inGameAsteroids[asteroidName];
+						var asteroidPos = ( ( new THREE.Vector3(0,0,0) ).sub( asteroid.position ) ).normalize();
+						var asteroidDist = asteroidPos.length();
+						var forceOfGrav = (GRAVITY_CONTSTANT * settings.asteroidMass * settings.planetMass) / (asteroidDist * asteroidDist);
+						asteroid.applyCentralForce( ((asteroidPos.normalize()).multiplyScalar( forceOfGrav )) );
+					}
+				})();
+				
 			} else {
 				(function() {
 					for(var gameStateAsteroidName in gameState.asteroids) {
