@@ -19,7 +19,7 @@ window.onload = function() {
 		planetRadius: 1,
 		asteroidSpawnForce: 2,
 		initialScreenHeight: 640,
-		planetMass: 100000000,
+		planetMass: 1000000000,
 		asteroidMass: 100,
 		radarArrowRadius: window.innerWidth / 3
 	};
@@ -56,7 +56,7 @@ window.onload = function() {
 		new THREE.BoxGeometry(1, 1, 1),
 		new THREE.MeshNormalMaterial(),
 		0
-	);	
+	);
 			
 	// GUI
 	var guiPanels = {
@@ -75,6 +75,7 @@ window.onload = function() {
 	}, false);
 	var radar = document.getElementById('radar');
 	var radarArrowSrc = "assets/gui/radar-arrow.png";
+	var silhouette = document.getElementById('silhouette');
 		
 	// Device Orientation
 	var applyDeviceOrientation = function() {
@@ -224,6 +225,7 @@ window.onload = function() {
 		setActivePanel('game');
 		// init player scene
 		if(player === attacker) {
+			silhouette.style.display = 'none';
 			radar.style.display = 'none';
 			scenes.game = new Physijs.Scene();
 			// init planet
@@ -231,6 +233,7 @@ window.onload = function() {
 			// disable default gravity
 			scenes.game.setGravity( new THREE.Vector3(0,0,0) );
 		} else {
+			silhouette.style.display = 'block';
 			radar.style.display = 'inline';
 			scenes.game = new THREE.Scene();
 			socket.on("simulation-frame", function(data) {
@@ -320,6 +323,7 @@ window.onload = function() {
 							newAsteroid.name = gameStateAsteroidName;
 							newAsteroid.position.set(gameStateAsteroidPos.x, gameStateAsteroidPos.y, gameStateAsteroidPos.z);
 							inGameAsteroids[ gameStateAsteroidName ] = newAsteroid;
+							pulseSilhouette(300);
 						}
 					}
 				})();
@@ -331,6 +335,14 @@ window.onload = function() {
 		setTimeout( function() {
 			requestAnimationFrame( update );
 		}, 1000 / settings.frameRate );
+	}
+	
+	// damage effect pulse
+	function pulseSilhouette(duration) {
+		silhouette.style.boxShadow = 'inset 0 0 16px 2px #ff0000';
+		setTimeout(function() {
+			silhouette.style.boxShadow = 'none';
+		}, duration);
 	}
 	
 	// update radar arrow position
