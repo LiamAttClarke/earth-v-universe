@@ -53,16 +53,6 @@ window.onload = function() {
 		asteroid: { geometry: new THREE.SphereGeometry(0.1, 12, 12), material: new THREE.MeshNormalMaterial() }
 	};
 	
-<<<<<<< HEAD
-	// Game Scene Objects
-	var planet = new Physijs.BoxMesh(
-		new THREE.BoxGeometry(1, 1, 1),
-		new THREE.MeshNormalMaterial(),
-		0
-	);
-			
-=======
->>>>>>> 7c972ef70471de5fa1c05ba36e0f28f87da45921
 	// GUI
 	var guiPanels = {
 		load: document.getElementById('load-panel'),
@@ -384,7 +374,6 @@ window.onload = function() {
 		}, 1000 / settings.frameRate );
 	}
 	
-<<<<<<< HEAD
 	// damage effect pulse
 	function pulseSilhouette(duration) {
 		silhouette.style.boxShadow = 'inset 0 0 16px 2px #ff0000';
@@ -393,7 +382,6 @@ window.onload = function() {
 		}, duration);
 	}
 	
-=======
 	// Lights
 	function initLights(scene) {
 		var light = new THREE.AmbientLight(0x404040);
@@ -402,7 +390,6 @@ window.onload = function() {
 		scene.add(light2);
 	}
 
->>>>>>> 7c972ef70471de5fa1c05ba36e0f28f87da45921
 	// update radar arrow position
 	function setArrowOrient( arrowElem, direction ) {
 		arrowElem.style.top = (window.innerHeight / 2) - Math.ceil(settings.radarArrowRadius * direction.y) + 'px';
