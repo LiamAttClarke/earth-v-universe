@@ -118,7 +118,6 @@ window.onload = function() {
 				prefabs.asteroid.material,
 				1
 			);
-			asteroid.scale.x = asteroid.scale.y = asteroid.scale.z = 0.05;
 			var spawnPos = screen2WorldPoint(screenX, screenY);
 			scenes.game.add( asteroid );
 			asteroid.__dirtyPosition = true;
@@ -172,14 +171,20 @@ window.onload = function() {
 	/*--------------------
 		Load Mesh data
 	---------------------*/
-	function getMaterial(texture) {
-		return new THREE.MeshPhongMaterial({
-			map: THREE.ImageUtils.loadTexture(texture), 
+	function getMaterial(textureDiffuse, textureBump) {
+
+		var params = {
+			map: THREE.ImageUtils.loadTexture(textureDiffuse), 
 			side: THREE.DoubleSide,
 			colorAmbient: [0.48, 0.48, 0.48],
 			colorDiffuse: [0.48, 0.48, 0.48],
 			colorSpecular: [0.9, 0.9, 0.9]
-		});
+		};
+
+		if (textureBump) {
+			//params.bumpMap = THREE.ImageUtils.loadTexture(textureBump);
+		}
+		return new THREE.MeshLambertMaterial(params);
 	}
 
 	function loadMeshes(callback) {
@@ -199,7 +204,7 @@ window.onload = function() {
 
 			loader.load(modelDir + 'asteroid.json', function (geometry) {
 				prefabs.asteroid.geometry = geometry;
-				prefabs.asteroid.material = getMaterial(textureDir + 'asteroid.jpg');
+				prefabs.asteroid.material = getMaterial(textureDir + 'asteroid_diffuse.jpg', textureDir + 'asteroid_bump.jpg');
 				callback();
 			});	
 		});
@@ -222,6 +227,7 @@ window.onload = function() {
 			prefabs.asteroid.geometry,
 			prefabs.asteroid.material
 		);
+		asteroid.scale.set(20, 20, 20);
 		currentScene.add( asteroid );
 
 		var sound = new Howl({
@@ -265,6 +271,7 @@ window.onload = function() {
 		setActivePanel('game');
 		// init player scene
 		if(player === attacker) {
+			document.title = "ROM JAM 2015 - Attacker";
 			silhouette.style.display = 'none';
 			radar.style.display = 'none';
 			scenes.game = new Physijs.Scene();
@@ -273,6 +280,7 @@ window.onload = function() {
 			// disable default gravity
 			scenes.game.setGravity( new THREE.Vector3(0,0,0) );
 		} else {
+			document.title = "ROM JAM 2015 - Defender";
 			silhouette.style.display = 'block';
 			radar.style.display = 'inline';
 			scenes.game = new THREE.Scene();
@@ -331,15 +339,18 @@ window.onload = function() {
 					for(var gameStateAsteroidName in gameState.asteroids) {
 						var gameStateAsteroid = gameState.asteroids[ gameStateAsteroidName ];
 						var inGameAsteroid = inGameAsteroids[ gameStateAsteroidName ];
-						var gameStateAsteroidPos = gameStateAsteroid.position;
 						if(gameStateAsteroid === null) {
 							scenes.menu.remove( inGameAsteroids[ gameStateAsteroidName ] );
+							
+							if (radarArrows[ gameStateAsteroidName ]) 
+								radar.removeChild( radarArrows[ gameStateAsteroidName ] );
+
 							delete inGameAsteroids[ gameStateAsteroidName ];
 							delete gameState.asteroids[ gameStateAsteroidName ];
-							radar.removeChild( radarArrows[ gameStateAsteroidName ] );
 							delete radarArrows[ gameStateAsteroidName ];
-							return;
+							continue;
 						}
+						var gameStateAsteroidPos = gameStateAsteroid.position;
 						if( inGameAsteroid ) {
 							var inGameAstPos = inGameAsteroid.position.set(gameStateAsteroidPos.x, gameStateAsteroidPos.y, gameStateAsteroidPos.z);
 							var arrow = radarArrows[ gameStateAsteroidName ];
@@ -383,6 +394,7 @@ window.onload = function() {
 		if (planet) {
 			planet.__dirtyRotation = true;
 			planet.rotation.z += 0.005;
+			planet.rotation.x += 0.005;
 		}
 		// Render Scene
 		renderer.render( currentScene, camera ); 		
@@ -395,7 +407,10 @@ window.onload = function() {
 	function destroyAsteroid(asteroid) {
 		currentScene.remove( asteroid );
 		delete inGameAsteroids[ asteroid.name ];
-		gameState.asteroids[ asteroid.name ] = null;
+		if (gameState.asteroids[ asteroid.name ] !== undefined) {
+			console.log(asteroid.name);			
+			gameState.asteroids[ asteroid.name ] = null;
+		}
 	}
 	
 	// damage effect pulse
