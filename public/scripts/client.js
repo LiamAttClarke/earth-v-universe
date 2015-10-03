@@ -10,8 +10,8 @@ window.onload = function() {
 	// Networking
 	//var dgram = require('dgram');
 	var io = require('socket.io-client');
-	var socket = io.connect('https://romjam-liamattclarke.rhcloud.com:8443', {'forceNew':true});
-	//var socket = io(); // local testing
+	//var socket = io.connect('https://romjam-liamattclarke.rhcloud.com:8443', {'forceNew':true});
+	var socket = io(); // local testing
 	
 	// Settings
 	var settings = {
@@ -28,7 +28,7 @@ window.onload = function() {
 	
 	// Globals
 	var camera, renderer, currentScene, isHost, tanFOV, initialZoom, asteroidCounter, planet;
-	var GRAVITY_CONTSTANT = 0.0000000000667408;
+	var GRAVITY_CONTSTANT = 0.00000000000667408;
 	var scenes = {};
 	var deviceData = {};
 	var inGameAsteroids = {};
@@ -50,7 +50,7 @@ window.onload = function() {
 	
 	// Prefab Objects
 	var prefabs = {
-		asteroid: { geometry: new THREE.SphereGeometry(0.1, 12, 12), material: new THREE.MeshNormalMaterial() }
+		asteroid: {}
 	};
 	
 	// GUI
@@ -127,6 +127,7 @@ window.onload = function() {
 			asteroid.applyCentralImpulse( fireDir.multiplyScalar( settings.asteroidSpawnForce ) );	
 			// create new asteroid object and pass it into gameState.asteroids
 			var asteroidName = 'asteroid' + asteroidCounter++;
+			asteroid.name = asteroidName;
 			inGameAsteroids[ asteroidName ] = asteroid;
 			var position = new Position(asteroid.position);
 			var asteroidObject = new AsteroidObject(asteroidName, position);
@@ -188,7 +189,13 @@ window.onload = function() {
 		var textureDir = 'assets/textures/';
 
 		loader.load(modelDir + 'planet.json', function (geometry) {
-			planet = new Physijs.BoxMesh(geometry, getMaterial(textureDir + 'planet.jpg'), 0);	
+			planet = new Physijs.SphereMesh(geometry, getMaterial(textureDir + 'planet.jpg'), 0);
+			planet.addEventListener('collision', function(obj) { // collision returns colliding object
+				destroyAsteroid( obj );
+				pulseSilhouette( 300 );
+				// playSound
+				// emit destroy event
+			});	
 
 			loader.load(modelDir + 'asteroid.json', function (geometry) {
 				prefabs.asteroid.geometry = geometry;
@@ -300,7 +307,6 @@ window.onload = function() {
 		// simulate physics
 		if(currentScene === scenes.game) {
 			if(isHost) {
-				currentScene.simulate();
 				(function() {
 					for(var inGameAsteroidName in inGameAsteroids) {
 						// update gameState
@@ -315,7 +321,9 @@ window.onload = function() {
 						asteroid.applyCentralForce( ((asteroidPos.normalize()).multiplyScalar( forceOfGrav )) );
 					}
 				})();
+				
 				// emit gameState
+				currentScene.simulate();
 				socket.emit('simulation-frame', gameState);
 			} else {
 				// Update asteroid position / gui indicator
@@ -324,6 +332,14 @@ window.onload = function() {
 						var gameStateAsteroid = gameState.asteroids[ gameStateAsteroidName ];
 						var inGameAsteroid = inGameAsteroids[ gameStateAsteroidName ];
 						var gameStateAsteroidPos = gameStateAsteroid.position;
+						if(gameStateAsteroid === null) {
+							scenes.menu.remove( inGameAsteroids[ gameStateAsteroidName ] );
+							delete inGameAsteroids[ gameStateAsteroidName ];
+							delete gameState.asteroids[ gameStateAsteroidName ];
+							radar.removeChild( radarArrows[ gameStateAsteroidName ] );
+							delete radarArrows[ gameStateAsteroidName ];
+							return;
+						}
 						if( inGameAsteroid ) {
 							var inGameAstPos = inGameAsteroid.position.set(gameStateAsteroidPos.x, gameStateAsteroidPos.y, gameStateAsteroidPos.z);
 							var arrow = radarArrows[ gameStateAsteroidName ];
@@ -358,20 +374,28 @@ window.onload = function() {
 							newAsteroid.name = gameStateAsteroidName;
 							newAsteroid.position.set(gameStateAsteroidPos.x, gameStateAsteroidPos.y, gameStateAsteroidPos.z);
 							inGameAsteroids[ gameStateAsteroidName ] = newAsteroid;
-							pulseSilhouette(300);
 						}
 					}
 				})();
 			}
 		}
 
-		if (planet) planet.rotation.z += Math.PI * 0.01;
+		if (planet) {
+			planet.__dirtyRotation = true;
+			planet.rotation.z += 0.005;
+		}
 		// Render Scene
 		renderer.render( currentScene, camera ); 		
 		// limit framerate
 		setTimeout( function() {
 			requestAnimationFrame( update );
 		}, 1000 / settings.frameRate );
+	}
+	
+	function destroyAsteroid(asteroid) {
+		currentScene.remove( asteroid );
+		delete inGameAsteroids[ asteroid.name ];
+		gameState.asteroids[ asteroid.name ] = null;
 	}
 	
 	// damage effect pulse
@@ -407,6 +431,7 @@ window.onload = function() {
 		var newArrow = document.createElement('img');
 		newArrow.setAttribute('src', radarArrowSrc);
 		newArrow.setAttribute('width', '32px');
+		newArrow.setAttribute('height', '16px');
 		newArrow.classList.add('radar-arrow');
 		radarArrows[ arrowName ] = newArrow;
 		radar.appendChild( newArrow );
