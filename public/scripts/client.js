@@ -3,6 +3,8 @@ window.onload = function() {
 	// Dependencies
 	var THREE = require('three');
 	var Physijs = require('physijs-browserify')(THREE);
+	var Howl = require('howler').Howl;
+
 	Physijs.scripts.worker = '/scripts/physi-worker.js';
 	Physijs.scripts.ammo = '/scripts/ammo.js';
 	// Networking
@@ -25,7 +27,7 @@ window.onload = function() {
 	};
 	
 	// Globals
-	var camera, renderer, currentScene, isHost, tanFOV, initialZoom, asteroidCounter;
+	var camera, renderer, currentScene, isHost, tanFOV, initialZoom, asteroidCounter, planet;
 	var GRAVITY_CONTSTANT = 0.0000000000667408;
 	var scenes = {};
 	var deviceData = {};
@@ -51,6 +53,7 @@ window.onload = function() {
 		asteroid: { geometry: new THREE.SphereGeometry(0.1, 12, 12), material: new THREE.MeshNormalMaterial() }
 	};
 	
+<<<<<<< HEAD
 	// Game Scene Objects
 	var planet = new Physijs.BoxMesh(
 		new THREE.BoxGeometry(1, 1, 1),
@@ -58,6 +61,8 @@ window.onload = function() {
 		0
 	);
 			
+=======
+>>>>>>> 7c972ef70471de5fa1c05ba36e0f28f87da45921
 	// GUI
 	var guiPanels = {
 		load: document.getElementById('load-panel'),
@@ -123,6 +128,7 @@ window.onload = function() {
 				prefabs.asteroid.material,
 				1
 			);
+			asteroid.scale.x = asteroid.scale.y = asteroid.scale.z = 0.05;
 			var spawnPos = screen2WorldPoint(screenX, screenY);
 			scenes.game.add( asteroid );
 			asteroid.__dirtyPosition = true;
@@ -168,9 +174,40 @@ window.onload = function() {
 			deviceData = event;
 		}, false);
 		// initialize main menu
-		initMenu();
+		loadMeshes(initMenu);	
+
 	})();
 	
+	/*--------------------
+		Load Mesh data
+	---------------------*/
+	function getMaterial(texture) {
+		return new THREE.MeshPhongMaterial({
+			map: THREE.ImageUtils.loadTexture(texture), 
+			side: THREE.DoubleSide,
+			colorAmbient: [0.48, 0.48, 0.48],
+			colorDiffuse: [0.48, 0.48, 0.48],
+			colorSpecular: [0.9, 0.9, 0.9]
+		});
+	}
+
+	function loadMeshes(callback) {
+		var loader = new THREE.JSONLoader(); // init the loader util
+
+		var modelDir = 'assets/models/';
+		var textureDir = 'assets/textures/';
+
+		loader.load(modelDir + 'planet.json', function (geometry) {
+			planet = new Physijs.BoxMesh(geometry, getMaterial(textureDir + 'planet.jpg'), 0);	
+
+			loader.load(modelDir + 'asteroid.json', function (geometry) {
+				prefabs.asteroid.geometry = geometry;
+				prefabs.asteroid.material = getMaterial(textureDir + 'asteroid.jpg');
+				callback();
+			});	
+		});
+	}
+
 	/*--------------------
 		INIT MENU SCENE
 	---------------------*/
@@ -181,13 +218,19 @@ window.onload = function() {
 		// init menu scene
 		scenes.menu = new THREE.Scene();
 		currentScene = scenes.menu;
-		initSkyBox(scenes.menu);
+		initSkyBox(currentScene);
+		initLights(currentScene);
 		player = attacker;
 		var asteroid = new THREE.Mesh(
-			new THREE.SphereGeometry(1, 16, 16),
+			prefabs.asteroid.geometry,
 			prefabs.asteroid.material
 		);
 		currentScene.add( asteroid );
+
+		var sound = new Howl({
+		  urls: ['assets/audio/song.mp3']
+		}).play();
+
 		// begin render vindaloop
 		update();
 	}
@@ -244,6 +287,8 @@ window.onload = function() {
 		currentScene = scenes.game;
 		// init Skybox
 		initSkyBox(currentScene);
+		initLights(currentScene);
+
 		// fire projectile
 		window.addEventListener('click', function(event) {
 			player.fire(event.clientX, event.clientY);
@@ -329,6 +374,8 @@ window.onload = function() {
 				})();
 			}
 		}
+
+		if (planet) planet.rotation.z += Math.PI * 0.01;
 		// Render Scene
 		renderer.render( currentScene, camera ); 		
 		// limit framerate
@@ -337,6 +384,7 @@ window.onload = function() {
 		}, 1000 / settings.frameRate );
 	}
 	
+<<<<<<< HEAD
 	// damage effect pulse
 	function pulseSilhouette(duration) {
 		silhouette.style.boxShadow = 'inset 0 0 16px 2px #ff0000';
@@ -345,6 +393,16 @@ window.onload = function() {
 		}, duration);
 	}
 	
+=======
+	// Lights
+	function initLights(scene) {
+		var light = new THREE.AmbientLight(0x404040);
+		var light2 = new THREE.DirectionalLight(0xffffff, 0.5);
+		scene.add(light);
+		scene.add(light2);
+	}
+
+>>>>>>> 7c972ef70471de5fa1c05ba36e0f28f87da45921
 	// update radar arrow position
 	function setArrowOrient( arrowElem, direction ) {
 		arrowElem.style.top = (window.innerHeight / 2) - Math.ceil(settings.radarArrowRadius * direction.y) + 'px';
