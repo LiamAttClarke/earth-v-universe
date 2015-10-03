@@ -3,7 +3,7 @@ window.onload = function() {
 	// Dependencies
 	var THREE = require('three');
 	var Physijs = require('physijs-browserify')(THREE);
-	var Howl = require('howler');
+	var Howl = require('howler').Howl;
 
 	Physijs.scripts.worker = '/scripts/physi-worker.js';
 	Physijs.scripts.ammo = '/scripts/ammo.js';
@@ -215,6 +215,11 @@ window.onload = function() {
 			prefabs.asteroid.material
 		);
 		currentScene.add( asteroid );
+
+		var sound = new Howl({
+		  urls: ['assets/audio/song.mp3']
+		}).play();
+
 		// begin render vindaloop
 		update();
 	}
