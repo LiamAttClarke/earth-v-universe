@@ -132,6 +132,12 @@ canvas {
 #game-panel {
 	display: none;
 }
+#radar {
+	display: none;
+}
+.radar-arrow {
+	position: fixed;
+}
 .panel {
 	position: absolute;
 	width: 100%;
