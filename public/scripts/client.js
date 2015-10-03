@@ -22,7 +22,7 @@ window.onload = function() {
 	};
 	
 	// Globals
-	var camera, renderer, currentScene, isHost, tanFOV, initialZoom, asteroidCounter;
+	var camera, renderer, currentScene, isHost, tanFOV, initialZoom, asteroidCounter, planet;
 	var scenes = {};
 	var deviceData = {};
 	var inGameAsteroids = {};
@@ -46,13 +46,6 @@ window.onload = function() {
 		asteroid: { geometry: new THREE.SphereGeometry(0.1, 12, 12), material: new THREE.MeshNormalMaterial() }
 	};
 	
-	// Game Scene Objects
-	var planet = new Physijs.BoxMesh(
-		new THREE.BoxGeometry(1, 1, 1),
-		new THREE.MeshNormalMaterial(),
-		0
-	);	
-			
 	// GUI
 	var guiPanels = {
 		load: document.getElementById('load-panel'),
@@ -114,6 +107,7 @@ window.onload = function() {
 				prefabs.asteroid.material,
 				1
 			);
+			asteroid.scale.x = asteroid.scale.y = asteroid.scale.z = 0.05;
 			var spawnPos = screen2WorldPoint(screenX, screenY);
 			scenes.game.add( asteroid );
 			asteroid.__dirtyPosition = true;
@@ -158,9 +152,40 @@ window.onload = function() {
 			deviceData = event;
 		}, false);
 		// initialize main menu
-		initMenu();
+		loadMeshes(initMenu);	
+
 	})();
 	
+	/*--------------------
+		Load Mesh data
+	---------------------*/
+	function getMaterial(texture) {
+		return new THREE.MeshPhongMaterial({
+			map: THREE.ImageUtils.loadTexture(texture), 
+			side: THREE.DoubleSide,
+			colorAmbient: [0.48, 0.48, 0.48],
+			colorDiffuse: [0.48, 0.48, 0.48],
+			colorSpecular: [0.9, 0.9, 0.9]
+		});
+	}
+
+	function loadMeshes(callback) {
+		var loader = new THREE.JSONLoader(); // init the loader util
+
+		var modelDir = 'assets/models/';
+		var textureDir = 'assets/textures/';
+
+		loader.load(modelDir + 'planet.json', function (geometry) {
+			planet = new Physijs.BoxMesh(geometry, getMaterial(textureDir + 'planet.jpg'), 0);	
+
+			loader.load(modelDir + 'asteroid.json', function (geometry) {
+				prefabs.asteroid.geometry = geometry;
+				prefabs.asteroid.material = getMaterial(textureDir + 'asteroid.jpg');
+				callback();
+			});	
+		});
+	}
+
 	/*--------------------
 		INIT MENU SCENE
 	---------------------*/
@@ -171,10 +196,11 @@ window.onload = function() {
 		// init menu scene
 		scenes.menu = new THREE.Scene();
 		currentScene = scenes.menu;
-		initSkyBox(scenes.menu);
+		initSkyBox(currentScene);
+		initLights(currentScene);
 		player = attacker;
 		var asteroid = new THREE.Mesh(
-			new THREE.SphereGeometry(1, 16, 16),
+			prefabs.asteroid.geometry,
 			prefabs.asteroid.material
 		);
 		currentScene.add( asteroid );
@@ -230,6 +256,8 @@ window.onload = function() {
 		currentScene = scenes.game;
 		// init Skybox
 		initSkyBox(currentScene);
+		initLights(currentScene);
+
 		// fire projectile
 		window.addEventListener('click', function(event) {
 			player.fire(event.clientX, event.clientY);
@@ -284,6 +312,8 @@ window.onload = function() {
 				})();
 			}
 		}
+
+		if (planet) planet.rotation.z += Math.PI * 0.01;
 		// Render Scene
 		renderer.render( currentScene, camera ); 		
 		// limit framerate
@@ -292,6 +322,14 @@ window.onload = function() {
 		}, 1000 / settings.frameRate );
 	}
 	
+	// Lights
+	function initLights(scene) {
+		var light = new THREE.AmbientLight(0x404040);
+		var light2 = new THREE.DirectionalLight(0xffffff, 0.5);
+		scene.add(light);
+		scene.add(light2);
+	}
+
 	// Skybox
 	function initSkyBox(scene) {
 		var urlPrefix = 'assets/textures/skybox/';
