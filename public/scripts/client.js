@@ -165,8 +165,8 @@ window.onload = function() {
 			scenes.game.add( laser );
 			var pos = screen2WorldPoint(screenX, screenY);
 			var dir = pos.sub( camera.position ).normalize();
-			laser.setDirection( new THREE.Vector3(0,0,-1) );
-			laser.position.set(0,0,0);
+			laser.setDirection( dir );
+			laser.position.set(0,-1,0);
 			for(var asteroidName in inGameAsteroids) {
 				var target = ( raycaster.intersectObject( inGameAsteroids[ asteroidName ] ) )[0];
 				if(target) {
