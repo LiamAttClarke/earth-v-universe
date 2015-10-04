@@ -11,20 +11,6 @@ server.listen(PORT, HOST, function() {
 	console.log('TCP Server Listening on ' + HOST + ':' + PORT);
 });
 
-// UDP/IP
-/*var dgram = require('dgram');
-var UDPServer = dgram.createSocket('udp4');
-
-UDPServer.on('listening', function () {
-    var address = UDPServer.address();
-    console.log('UDP Server listening on ' + address.address + ":" + address.port);
-});
-UDPServer.on('message', function (message, remote) {
-    console.log(remote.address + ':' + remote.port +' - ' + message);
-
-});
-UDPServer.bind(PORT, HOST);*/
-
 //set static folder for application
 app.use(express.static('public'));
 
