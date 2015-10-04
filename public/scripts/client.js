@@ -162,11 +162,11 @@ window.onload = function() {
 			raycaster.precision = 0.0000001;
 			raycaster.setFromCamera(new THREE.Vector2(screenX, screenY), camera);
 
-			scenes.game.add( laser );
+			/*scenes.game.add( laser );
 			var pos = screen2WorldPoint(screenX, screenY);
 			var dir = pos.sub( camera.position ).normalize();
 			laser.setDirection( dir );
-			laser.position.set(0,-1,0);
+			laser.position.set(0,-1,0);*/
 			for(var asteroidName in inGameAsteroids) {
 				var target = ( raycaster.intersectObject( inGameAsteroids[ asteroidName ] ) )[0];
 				if(target) {
@@ -203,21 +203,21 @@ window.onload = function() {
 		};
 		asteroidSFX = [
 			new Howl({urls: [audioSrcPrefix + 'sfx_asteroid1.mp3'], buffer: true}),
-			new Howl({urls: [audioSrcPrefix + 'sfx_asteroid2.mp3'], buffer: true}),
+			/*new Howl({urls: [audioSrcPrefix + 'sfx_asteroid2.mp3'], buffer: true}),
 			new Howl({urls: [audioSrcPrefix + 'sfx_asteroid3.mp3'], buffer: true}),
-			new Howl({urls: [audioSrcPrefix + 'sfx_asteroid4.mp3'], buffer: true})
+			new Howl({urls: [audioSrcPrefix + 'sfx_asteroid4.mp3'], buffer: true})*/
 		];
 		collisionSFX = [
 			new Howl({urls: [audioSrcPrefix + 'sfx_collision1.mp3'], buffer: true}),
-			new Howl({urls: [audioSrcPrefix + 'sfx_collision2.mp3'], buffer: true}),
+			/*new Howl({urls: [audioSrcPrefix + 'sfx_collision2.mp3'], buffer: true}),
 			new Howl({urls: [audioSrcPrefix + 'sfx_collision3.mp3'], buffer: true}),
-			new Howl({urls: [audioSrcPrefix + 'sfx_collision4.mp3'], buffer: true})
+			new Howl({urls: [audioSrcPrefix + 'sfx_collision4.mp3'], buffer: true})*/
 		];
 		laserSFX = [
 			new Howl({urls: [audioSrcPrefix + 'sfx_laser1.mp3'], buffer: true}),
-			new Howl({urls: [audioSrcPrefix + 'sfx_laser2.mp3'], buffer: true}),
+			/*new Howl({urls: [audioSrcPrefix + 'sfx_laser2.mp3'], buffer: true}),
 			new Howl({urls: [audioSrcPrefix + 'sfx_laser3.mp3'], buffer: true}),
-			new Howl({urls: [audioSrcPrefix + 'sfx_laser4.mp3'], buffer: true})
+			new Howl({urls: [audioSrcPrefix + 'sfx_laser4.mp3'], buffer: true})*/
 		];
 	
 		// window resize event
@@ -321,6 +321,7 @@ window.onload = function() {
 		
 		musicTracks.game.stop();
 		musicTracks.menu.play();
+		musicTracks.menu.unmute();
 		
 		// begin render vindaloop
 		update();
@@ -356,6 +357,7 @@ window.onload = function() {
 	function initGame() {
 		musicTracks.menu.stop();
 		musicTracks.game.play();
+		musicTracks.game.unmute();
 		asteroidCounter = 0;
 		// set GUI
 		setActivePanel('game');
