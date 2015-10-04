@@ -274,14 +274,22 @@ window.onload = function() {
 				},
 				texture2: { type: 't', 
 					value: THREE.ImageUtils.loadTexture( textureDir + 'planet.jpg' ) }
-				},				
-				shading: THREE.FlatShading,
+				},		
+				side: THREE.FrontSide,		
+				shading: THREE.SmoothShading,
 				transparent: true,
 				vertexShader: AtmosphereShader.vertexShader,
 				fragmentShader: AtmosphereShader.fragmentShaderSolid
 			});
+			sphereMat.uniforms.texture1.value.wrapS = 
+			sphereMat.uniforms.texture1.value.wrapT = 
+			THREE.ClampToEdgeWrapping;
 
-			planet = new Physijs.SphereMesh(geometry, sphereMat, 0);//getMaterial(textureDir + 'planet.jpg'), 0);
+			sphereMat.uniforms.texture2.value.wrapS = 
+			sphereMat.uniforms.texture2.value.wrapT = 
+			THREE.ClampToEdgeWrapping;
+
+			planet = new Physijs.SphereMesh(geometry, getMaterial(textureDir + 'planet.jpg'), 0);
 			planet.addEventListener('collision', function(obj) { // collision returns colliding object
 				destroyAsteroid( obj );
 				defender.health -= 20;
@@ -382,12 +390,15 @@ window.onload = function() {
 
 				uniforms: {
 					res: {type: 'v2', value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
-					texture1: { type: 't', value: THREE.ImageUtils.loadTexture( 'assets/textures/225.png' ) }
+					texture1: { type: 't', value: THREE.ImageUtils.loadTexture( 'assets/textures/clouds.png' ) }
 				},
 				transparent: true,
+				side: THREE.FrontSide,
+				shading: THREE.SmoothShading,
 				vertexShader: AtmosphereShader.vertexShader,
 				fragmentShader: AtmosphereShader.fragmentShaderTransparent
 			});
+
 			//sphereMat = new THREE.MeshNormalMaterial();
 			atmosphere = new THREE.Mesh(sphereGeom, sphereMat);
 
