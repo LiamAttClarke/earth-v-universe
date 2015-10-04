@@ -22,8 +22,8 @@ window.onload = function() {
 	var settings = {
 		frameRate: 60,
 		fieldOfView: 30,
-		defenderOrbitRadius: 8,
-		planetRadius: 1,
+		attackerOrbitRadius: 8,
+		defenderOrbitRadius: 1,
 		asteroidSpawnForce: 4,
 		initialScreenHeight: 640,
 		planetMass: 1000000000,
@@ -114,7 +114,7 @@ window.onload = function() {
 	var attacker = {
 		mass: 100,
 		updateOrientation: function() {
-			applyOrientation(settings.defenderOrbitRadius);
+			applyOrientation(settings.attackerOrbitRadius);
 		},
 		// fire projectile
 		fire: function(screenX, screenY) {
@@ -142,7 +142,7 @@ window.onload = function() {
 	var defender = {
 		health: 100,
 		updateOrientation: function() {
-			applyOrientation(-settings.planetRadius);
+			applyOrientation(-settings.defenderOrbitRadius);
 		},
 		fire: function(screenX, screenY) {
 			screenX = (screenX / window.innerWidth) * 2 - 1;
@@ -245,6 +245,8 @@ window.onload = function() {
 			planet.addEventListener('collision', function(obj) { // collision returns colliding object
 				destroyAsteroid( obj );
 				pulseSilhouette( 300 );
+				defender.health--;
+				console.log('health:', defender.health);
 				collisionSFX[ Math.floor( Math.random() * collisionSFX.length ) ].play();
 			});	
 
@@ -376,7 +378,10 @@ window.onload = function() {
 		window.addEventListener('touchstart', function(event) {
 			event.preventDefault();
 			var touch = event.touches[0];
+			player.mass--;
+			console.log('mass', player.mass);		
 			player.fire(touch.screenX, touch.screenY);
+
 		}, false);
 	}
 	
