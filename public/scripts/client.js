@@ -249,6 +249,8 @@ window.onload = function() {
 			planet.addEventListener('collision', function(obj) { // collision returns colliding object
 				destroyAsteroid( obj );
 				pulseSilhouette( 300 );
+				defender.health--;
+				console.log('health:', defender.health);
 				collisionSFX[ Math.floor( Math.random() * collisionSFX.length ) ].play();
 			});	
 
@@ -380,7 +382,10 @@ window.onload = function() {
 		window.addEventListener('touchstart', function(event) {
 			event.preventDefault();
 			var touch = event.touches[0];
+			player.mass--;
+			console.log('mass', player.mass);		
 			player.fire(touch.screenX, touch.screenY);
+
 		}, false);
 	}
 	
