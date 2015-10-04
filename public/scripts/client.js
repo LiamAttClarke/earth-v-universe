@@ -352,6 +352,7 @@ window.onload = function() {
 				vertexShader: AtmosphereShader.vertexShader,
 				fragmentShader: AtmosphereShader.fragmentShaderTransparent
 			});
+
 			//sphereMat = new THREE.MeshNormalMaterial();
 			atmosphere = new THREE.Mesh(sphereGeom, sphereMat);
 
