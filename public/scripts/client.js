@@ -4,6 +4,7 @@ window.onload = function() {
 	var THREE = require('three');
 	var Physijs = require('physijs-browserify')(THREE);
 	var Howl = require('howler').Howl;
+	var AtmosphereShader = require('./atmosphere');
 
 	Physijs.scripts.worker = '/scripts/physi-worker.js';
 	Physijs.scripts.ammo = '/scripts/ammo.js';
@@ -27,7 +28,7 @@ window.onload = function() {
 	};
 	
 	// Globals
-	var camera, renderer, currentScene, isHost, tanFOV, initialZoom, asteroidCounter, planet;
+	var camera, renderer, currentScene, isHost, tanFOV, initialZoom, asteroidCounter, planet, atmosphere;
 	var GRAVITY_CONTSTANT = 0.00000000000667408;
 	var scenes = {};
 	var deviceData = {};
@@ -179,7 +180,7 @@ window.onload = function() {
 			colorAmbient: [0.48, 0.48, 0.48],
 			colorDiffuse: [0.48, 0.48, 0.48],
 			colorSpecular: [0.9, 0.9, 0.9],
-			shading: THREE.FlatShading
+			shading: THREE.FlatShading 
 		};
 
 		if (textureBump) {
@@ -195,7 +196,22 @@ window.onload = function() {
 		var textureDir = 'assets/textures/';
 
 		loader.load(modelDir + 'planet.json', function (geometry) {
-			planet = new Physijs.SphereMesh(geometry, getMaterial(textureDir + 'planet.jpg'), 0);
+
+			var sphereMat = new THREE.ShaderMaterial({
+			uniforms: {
+				texture1: { type: 't', 
+					value: THREE.ImageUtils.loadTexture( 'assets/textures/13.jpg' ) 
+				},
+				texture2: { type: 't', 
+					value: THREE.ImageUtils.loadTexture( textureDir + 'planet.jpg' ) }
+				},				
+				shading: THREE.FlatShading,
+				transparent: true,
+				vertexShader: AtmosphereShader.vertexShader,
+				fragmentShader: AtmosphereShader.fragmentShaderSolid
+			});
+
+			planet = new Physijs.SphereMesh(geometry, sphereMat, 0);//getMaterial(textureDir + 'planet.jpg'), 0);
 			planet.addEventListener('collision', function(obj) { // collision returns colliding object
 				destroyAsteroid( obj );
 				pulseSilhouette( 300 );
@@ -228,7 +244,8 @@ window.onload = function() {
 			prefabs.asteroid.geometry,
 			prefabs.asteroid.material
 		);
-		asteroid.scale.set(20, 20, 20);
+		var scale = 11.5;
+		asteroid.scale.set(scale, scale, scale);
 		currentScene.add( asteroid );
 
 		var sound = new Howl({
@@ -278,6 +295,29 @@ window.onload = function() {
 			scenes.game = new Physijs.Scene();
 			// init planet
 			scenes.game.add( planet );
+
+			var sphereGeom = new THREE.IcosahedronGeometry(1.3, 4);
+			// var sphereMat = new THREE.ShaderMaterial({
+			// 	map: THREE.ImageUtils.loadTexture('assets/textures/clouds.png'),
+			// 	side: THREE.DoubleSide,
+			// 	transparent: true,
+			// 	opacity: 1.0
+			// });
+
+			var sphereMat = new THREE.ShaderMaterial({
+
+				uniforms: {
+					res: {type: 'v2', value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+					texture1: { type: 't', value: THREE.ImageUtils.loadTexture( 'assets/textures/225.png' ) }
+				},
+				transparent: true,
+				vertexShader: AtmosphereShader.vertexShader,
+				fragmentShader: AtmosphereShader.fragmentShaderTransparent
+			});
+			//sphereMat = new THREE.MeshNormalMaterial();
+			atmosphere = new THREE.Mesh(sphereGeom, sphereMat);
+
+			scenes.game.add(atmosphere);
 			// disable default gravity
 			scenes.game.setGravity( new THREE.Vector3(0,0,0) );
 		} else {
@@ -392,10 +432,14 @@ window.onload = function() {
 			}
 		}
 
-		if (planet) {
+		if (planet && atmosphere) {
 			planet.__dirtyRotation = true;
-			planet.rotation.z += 0.005;
-			planet.rotation.x += 0.005;
+			var step = 0.005;
+			planet.rotation.z += step;
+			planet.rotation.x += step;
+
+			atmosphere.rotation.z += step;
+			atmosphere.rotation.y += step;
 		}
 		// Render Scene
 		renderer.render( currentScene, camera ); 		
