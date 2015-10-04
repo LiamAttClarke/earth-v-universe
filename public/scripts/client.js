@@ -195,7 +195,8 @@ window.onload = function() {
 			side: THREE.DoubleSide,
 			colorAmbient: [0.48, 0.48, 0.48],
 			colorDiffuse: [0.48, 0.48, 0.48],
-			colorSpecular: [0.9, 0.9, 0.9]
+			colorSpecular: [0.9, 0.9, 0.9],
+			shading: THREE.FlatShading
 		};
 
 		if (textureBump) {
