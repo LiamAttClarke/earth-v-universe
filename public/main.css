@@ -65,6 +65,9 @@ canvas {
 	color: #ffffff;
 	font-size: 2em;
 }
+.logo-title {
+	margin-bottom: 16px; 
+}
 #romLogo {
 	display: block;
 	width: 100%;

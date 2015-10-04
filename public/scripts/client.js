@@ -155,19 +155,6 @@ window.onload = function() {
 			applyOrientation(-1);
 		},
 		fire: function(screenX, screenY) {
-			/*var fireDir = screen2WorldPoint(screenX, screenY).sub( camera.position ).normalize();
-			for(var asteroidName in inGameAsteroids) {
-				var asteroid = inGameAsteroids[ asteroidName ];
-				var camera2Asteroid = (new THREE.Vector3()).copy(asteroid.position);
-				camera2Asteroid.sub(camera.position);
-				camera2Asteroid.normalize();
-				var dot = fireDir.dot( camera2Asteroid );
-				if(dot >= 1 - 0.05) {
-					debug('hit');
-					//socket.emit('laser-fired', asteroidName);
-					return;
-				}
-			}*/
 			laserSFX[ Math.floor( Math.random() * laserSFX.length ) ].play();
 			screenX = (screenX / window.innerWidth) * 2 - 1;
 			screenY = -(screenY / window.innerHeight) * 2 + 1;
@@ -178,7 +165,8 @@ window.onload = function() {
 			scenes.game.add( laser );
 			var pos = screen2WorldPoint(screenX, screenY);
 			var dir = pos.sub( camera.position ).normalize();
-			laser.setDirection( dir );
+			laser.setDirection( new THREE.Vector3(0,0,-1) );
+			laser.position.set(0,0,0);
 			for(var asteroidName in inGameAsteroids) {
 				var target = ( raycaster.intersectObject( inGameAsteroids[ asteroidName ] ) )[0];
 				if(target) {
@@ -210,23 +198,26 @@ window.onload = function() {
 		// Audio
 		var audioSrcPrefix = '../assets/audio/';
 		musicTracks = {
-			menu: new Howl({urls: [audioSrcPrefix + 'menu.ogg'], loop: true, buffer: true}),
-			game: new Howl({urls: [audioSrcPrefix + 'game.ogg'], loop: true, buffer: true})
+			menu: new Howl({urls: [audioSrcPrefix + 'menu.mp3'], loop: true, buffer: true}),
+			game: new Howl({urls: [audioSrcPrefix + 'game.mp3'], loop: true, buffer: true})
 		};
 		asteroidSFX = [
-			new Howl({urls: [audioSrcPrefix + 'sfx_asteroid1.ogg'], buffer: true}),
-			new Howl({urls: [audioSrcPrefix + 'sfx_asteroid2.ogg'], buffer: true}),
-			new Howl({urls: [audioSrcPrefix + 'sfx_asteroid3.ogg'], buffer: true})
+			new Howl({urls: [audioSrcPrefix + 'sfx_asteroid1.mp3'], buffer: true}),
+			new Howl({urls: [audioSrcPrefix + 'sfx_asteroid2.mp3'], buffer: true}),
+			new Howl({urls: [audioSrcPrefix + 'sfx_asteroid3.mp3'], buffer: true}),
+			new Howl({urls: [audioSrcPrefix + 'sfx_asteroid4.mp3'], buffer: true})
 		];
 		collisionSFX = [
-			new Howl({urls: [audioSrcPrefix + 'sfx_collision1.ogg'], buffer: true}),
-			new Howl({urls: [audioSrcPrefix + 'sfx_collision2.ogg'], buffer: true}),
-			new Howl({urls: [audioSrcPrefix + 'sfx_collision3.ogg'], buffer: true})
+			new Howl({urls: [audioSrcPrefix + 'sfx_collision1.mp3'], buffer: true}),
+			new Howl({urls: [audioSrcPrefix + 'sfx_collision2.mp3'], buffer: true}),
+			new Howl({urls: [audioSrcPrefix + 'sfx_collision3.mp3'], buffer: true}),
+			new Howl({urls: [audioSrcPrefix + 'sfx_collision4.mp3'], buffer: true})
 		];
 		laserSFX = [
-			new Howl({urls: [audioSrcPrefix + 'sfx_laser1.ogg'], buffer: true}),
-			new Howl({urls: [audioSrcPrefix + 'sfx_laser2.ogg'], buffer: true}),
-			new Howl({urls: [audioSrcPrefix + 'sfx_laser3.ogg'], buffer: true})
+			new Howl({urls: [audioSrcPrefix + 'sfx_laser1.mp3'], buffer: true}),
+			new Howl({urls: [audioSrcPrefix + 'sfx_laser2.mp3'], buffer: true}),
+			new Howl({urls: [audioSrcPrefix + 'sfx_laser3.mp3'], buffer: true}),
+			new Howl({urls: [audioSrcPrefix + 'sfx_laser4.mp3'], buffer: true})
 		];
 	
 		// window resize event
