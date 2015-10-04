@@ -10,8 +10,8 @@ window.onload = function() {
 	// Networking
 	//var dgram = require('dgram');
 	var io = require('socket.io-client');
-	//var socket = io.connect('https://romjam-liamattclarke.rhcloud.com:8443', {'forceNew':true});
-	var socket = io(); // local testing
+	var socket = io.connect('https://romjam-liamattclarke.rhcloud.com:8443', {'forceNew':true});
+	//var socket = io(); // local testing
 	
 	// Settings
 	var settings = {
@@ -27,7 +27,7 @@ window.onload = function() {
 	};
 	
 	// Globals
-	var camera, renderer, currentScene, isHost, tanFOV, initialZoom, asteroidCounter, planet;
+	var camera, renderer, currentScene, isHost, tanFOV, initialZoom, asteroidCounter, planet, musicTracks, asteroidSFX, collisionSFX;
 	var GRAVITY_CONTSTANT = 0.00000000000667408;
 	var scenes = {};
 	var deviceData = {};
@@ -131,6 +131,7 @@ window.onload = function() {
 			var position = new Position(asteroid.position);
 			var asteroidObject = new AsteroidObject(asteroidName, position);
 			gameState.asteroids[ asteroidName ] = asteroidObject;
+			asteroidSFX[ Math.floor( Math.random() * asteroidSFX.length ) ].play();
 		}
 	};
 	var defender = {
@@ -156,6 +157,23 @@ window.onload = function() {
 		// init Renderer
 		renderer = new THREE.WebGLRenderer({antialias:true});
 		document.body.appendChild( renderer.domElement );
+		// Audio
+		var audioSrcPrefix = '../assets/audio/';
+		musicTracks = {
+			title: new Howl({urls: [audioSrcPrefix + 'title.mp3'], loop: true}),
+			game: new Howl({urls: [audioSrcPrefix + 'game.mp3'], loop: true})
+		};
+		asteroidSFX = [
+			new Howl({urls: [audioSrcPrefix + 'sfx_asteroid1.mp3']}),
+			new Howl({urls: [audioSrcPrefix + 'sfx_asteroid2.mp3']}),
+			new Howl({urls: [audioSrcPrefix + 'sfx_asteroid3.mp3']})
+		];
+		collisionSFX = [
+			new Howl({urls: [audioSrcPrefix + 'sfx_collision1.mp3']}),
+			new Howl({urls: [audioSrcPrefix + 'sfx_collision2.mp3']}),
+			new Howl({urls: [audioSrcPrefix + 'sfx_collision3.mp3']})
+		];
+	
 		// window resize event
 		window.addEventListener('resize', onResizeEvent, false);
 		onResizeEvent();
@@ -165,7 +183,6 @@ window.onload = function() {
 		}, false);
 		// initialize main menu
 		loadMeshes(initMenu);	
-
 	})();
 	
 	/*--------------------
@@ -189,7 +206,6 @@ window.onload = function() {
 
 	function loadMeshes(callback) {
 		var loader = new THREE.JSONLoader(); // init the loader util
-
 		var modelDir = 'assets/models/';
 		var textureDir = 'assets/textures/';
 
@@ -198,7 +214,7 @@ window.onload = function() {
 			planet.addEventListener('collision', function(obj) { // collision returns colliding object
 				destroyAsteroid( obj );
 				pulseSilhouette( 300 );
-				// playSound
+				collisionSFX[ Math.floor( Math.random() * collisionSFX.length ) ].play();
 				// emit destroy event
 			});	
 
@@ -229,11 +245,9 @@ window.onload = function() {
 		);
 		asteroid.scale.set(20, 20, 20);
 		currentScene.add( asteroid );
-
-		var sound = new Howl({
-		  urls: ['assets/audio/song.mp3']
-		}).play();
-
+		
+		musicTracks.title.play();
+		
 		// begin render vindaloop
 		update();
 	}
@@ -266,6 +280,8 @@ window.onload = function() {
 	-------------------*/
 	
 	function initGame() {
+		musicTracks.title.stop();
+		musicTracks.game.play();
 		asteroidCounter = 0;
 		// set GUI
 		setActivePanel('game');
