@@ -22,9 +22,7 @@ window.onload = function() {
 	var settings = {
 		frameRate: 60,
 		fieldOfView: 30,
-		defenderOrbitRadius: 8,
-		planetRadius: 1,
-		asteroidSpawnForce: 4,
+		asteroidSpawnForce: 2,
 		initialScreenHeight: 640,
 		planetMass: 1000000000,
 		asteroidMass: 100,
@@ -33,7 +31,7 @@ window.onload = function() {
 	
 	// Globals
 	var camera, renderer, currentScene, isHost, tanFOV, initialZoom, asteroidCounter, planet, atmosphere, musicTracks, asteroidSFX, collisionSFX;
-	var GRAVITY_CONTSTANT = 0.0000000000667408;
+	var GRAVITY_CONTSTANT = 0.000000000001;
 	var scenes = {};
 	var deviceData = {};
 	var inGameAsteroids = {};
@@ -114,7 +112,7 @@ window.onload = function() {
 	var attacker = {
 		mass: 100,
 		updateOrientation: function() {
-			applyOrientation(settings.defenderOrbitRadius);
+			applyOrientation(12);
 		},
 		// fire projectile
 		fire: function(screenX, screenY) {
@@ -124,10 +122,11 @@ window.onload = function() {
 				1
 			);
 			var spawnPos = screen2WorldPoint(screenX, screenY);
+			var fireDir = ((new THREE.Vector3()).copy(spawnPos)).sub( camera.position ).normalize();
+			spawnPos.add(fireDir.multiplyScalar( 1 ));
 			scenes.game.add( asteroid );
 			asteroid.__dirtyPosition = true;
 			asteroid.position.copy( spawnPos );
-			var fireDir = spawnPos.sub( camera.position ).normalize();
 			asteroid.applyCentralImpulse( fireDir.multiplyScalar( settings.asteroidSpawnForce ) );	
 			// create new asteroid object and pass it into gameState.asteroids
 			var asteroidName = 'asteroid' + asteroidCounter++;
@@ -142,7 +141,7 @@ window.onload = function() {
 	var defender = {
 		health: 100,
 		updateOrientation: function() {
-			applyOrientation(-settings.planetRadius);
+			applyOrientation(-1);
 		},
 		fire: function(screenX, screenY) {
 			screenX = (screenX / window.innerWidth) * 2 - 1;
@@ -156,6 +155,11 @@ window.onload = function() {
 					return;
 				}
 			}
+		}
+	};
+	var lobbyPlayer = {
+		updateOrientation: function() {
+			applyOrientation(8);
 		}
 	};
 	
@@ -268,7 +272,7 @@ window.onload = function() {
 		currentScene = scenes.menu;
 		initSkyBox(currentScene);
 		initLights(currentScene);
-		player = attacker;
+		player = lobbyPlayer;
 		var asteroid = new THREE.Mesh(
 			prefabs.asteroid.geometry,
 			prefabs.asteroid.material
@@ -416,7 +420,7 @@ window.onload = function() {
 						var gameStateAsteroid = gameState.asteroids[ gameStateAsteroidName ];
 						var inGameAsteroid = inGameAsteroids[ gameStateAsteroidName ];
 						if(gameStateAsteroid === null) {
-							scenes.menu.remove( inGameAsteroids[ gameStateAsteroidName ] );
+							scenes.game.remove( inGameAsteroids[ gameStateAsteroidName ] );
 							
 							if (radarArrows[ gameStateAsteroidName ]) 
 								radar.removeChild( radarArrows[ gameStateAsteroidName ] );
