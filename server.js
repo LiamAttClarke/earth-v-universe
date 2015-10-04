@@ -64,6 +64,9 @@ io.sockets.on('connection', function(socket) {
 		socket.on('simulation-frame', function(data) {
 			socket.broadcast.to(room.name).emit('simulation-frame', data);
 		});
+		socket.on('laser-fired', function(target) {
+			socket.broadcast.to(room.name).emit('laser-fired', target);
+		});
 		// connection lost event
 		socket.on('disconnect', function() {
 			console.log(socket.id + ' - connection lost');

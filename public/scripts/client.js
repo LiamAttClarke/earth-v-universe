@@ -19,7 +19,7 @@ window.onload = function() {
 		fieldOfView: 30,
 		defenderOrbitRadius: 8,
 		planetRadius: 1,
-		asteroidSpawnForce: 2,
+		asteroidSpawnForce: 4,
 		initialScreenHeight: 640,
 		planetMass: 1000000000,
 		asteroidMass: 100,
@@ -28,7 +28,7 @@ window.onload = function() {
 	
 	// Globals
 	var camera, renderer, currentScene, isHost, tanFOV, initialZoom, asteroidCounter, planet, musicTracks, asteroidSFX, collisionSFX;
-	var GRAVITY_CONTSTANT = 0.00000000000667408;
+	var GRAVITY_CONTSTANT = 0.0000000000667408;
 	var scenes = {};
 	var deviceData = {};
 	var inGameAsteroids = {};
@@ -139,8 +139,18 @@ window.onload = function() {
 		updateOrientation: function() {
 			applyOrientation(-settings.planetRadius);
 		},
-		fire: function() {
-			// fire projectile
+		fire: function(screenX, screenY) {
+			screenX = (screenX / window.innerWidth) * 2 - 1;
+			screenY = (screenY / window.innerWidth) * 2 + 1;
+			var raycaster = new THREE.Raycaster();
+			raycaster.setFromCamera(new THREE.Vector2(screenX, screenY), camera);
+			for(var asteroidName in inGameAsteroids) {
+				var target = ( raycaster.intersectObject( inGameAsteroids[ asteroidName ] ) )[0];
+				if(target) {
+					socket.emit('laser-fired', target.name);
+					return;
+				}
+			}
 		}
 	};
 	
@@ -216,7 +226,6 @@ window.onload = function() {
 				destroyAsteroid( obj );
 				pulseSilhouette( 300 );
 				collisionSFX[ Math.floor( Math.random() * collisionSFX.length ) ].play();
-				// emit destroy event
 			});	
 
 			loader.load(modelDir + 'asteroid.json', function (geometry) {
@@ -247,6 +256,7 @@ window.onload = function() {
 		asteroid.scale.set(20, 20, 20);
 		currentScene.add( asteroid );
 		
+		musicTracks.game.stop();
 		musicTracks.title.play();
 		
 		// begin render vindaloop
@@ -292,10 +302,14 @@ window.onload = function() {
 			silhouette.style.display = 'none';
 			radar.style.display = 'none';
 			scenes.game = new Physijs.Scene();
+			scenes.game.setFixedTimeStep();
 			// init planet
 			scenes.game.add( planet );
 			// disable default gravity
 			scenes.game.setGravity( new THREE.Vector3(0,0,0) );
+			socket.on('laser-fired', function(target) {
+				destroyAsteroid( inGameAsteroids[ target ] )
+			});
 		} else {
 			document.title = "ROM JAM 2015 - Defender";
 			silhouette.style.display = 'block';
@@ -344,6 +358,7 @@ window.onload = function() {
 						var asteroidDist = asteroidPos.length();
 						var forceOfGrav = (GRAVITY_CONTSTANT * settings.asteroidMass * settings.planetMass) / (asteroidDist * asteroidDist);
 						asteroid.applyCentralForce( ((asteroidPos.normalize()).multiplyScalar( forceOfGrav )) );
+						asteroid.setDamping(0.2, 0);
 					}
 				})();
 				
