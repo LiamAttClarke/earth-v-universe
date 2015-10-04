@@ -355,7 +355,7 @@ window.onload = function() {
 			//sphereMat = new THREE.MeshNormalMaterial();
 			atmosphere = new THREE.Mesh(sphereGeom, sphereMat);
 
-			//scenes.game.add(atmosphere);
+			scenes.game.add(atmosphere);
 			// disable default gravity
 			scenes.game.setGravity( new THREE.Vector3(0,0,0) );
 			socket.on('laser-fired', function(target) {
