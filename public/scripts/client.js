@@ -348,6 +348,7 @@ window.onload = function() {
 					texture1: { type: 't', value: THREE.ImageUtils.loadTexture( 'assets/textures/225.png' ) }
 				},
 				transparent: true,
+				side: THREE.DoubleSide,
 				vertexShader: AtmosphereShader.vertexShader,
 				fragmentShader: AtmosphereShader.fragmentShaderTransparent
 			});
