@@ -239,7 +239,7 @@ window.onload = function() {
 				texture2: { type: 't', 
 					value: THREE.ImageUtils.loadTexture( textureDir + 'planet.jpg' ) }
 				},		
-				side: THREE.DoubleSide,		
+				side: THREE.FrontSide,		
 				shading: THREE.SmoothShading,
 				transparent: true,
 				vertexShader: AtmosphereShader.vertexShader,
