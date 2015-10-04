@@ -253,7 +253,7 @@ window.onload = function() {
 			sphereMat.uniforms.texture2.value.wrapT = 
 			THREE.ClampToEdgeWrapping;
 
-			planet = new Physijs.SphereMesh(geometry, sphereMat, 0);//getMaterial(textureDir + 'planet.jpg'), 0);
+			planet = new Physijs.SphereMesh(geometry, getMaterial(textureDir + 'planet.jpg'), 0);
 			planet.addEventListener('collision', function(obj) { // collision returns colliding object
 				destroyAsteroid( obj );
 				pulseSilhouette( 300 );
@@ -353,10 +353,10 @@ window.onload = function() {
 
 				uniforms: {
 					res: {type: 'v2', value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
-					texture1: { type: 't', value: THREE.ImageUtils.loadTexture( 'assets/textures/225.png' ) }
+					texture1: { type: 't', value: THREE.ImageUtils.loadTexture( 'assets/textures/clouds.png' ) }
 				},
 				transparent: true,
-				side: THREE.DoubleSide,
+				side: THREE.FrontSide,
 				shading: THREE.SmoothShading,
 				vertexShader: AtmosphereShader.vertexShader,
 				fragmentShader: AtmosphereShader.fragmentShaderTransparent
@@ -365,7 +365,7 @@ window.onload = function() {
 			//sphereMat = new THREE.MeshNormalMaterial();
 			atmosphere = new THREE.Mesh(sphereGeom, sphereMat);
 
-			//scenes.game.add(atmosphere);
+			scenes.game.add(atmosphere);
 			// disable default gravity
 			scenes.game.setGravity( new THREE.Vector3(0,0,0) );
 			socket.on('laser-fired', function(target) {
