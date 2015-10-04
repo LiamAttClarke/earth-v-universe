@@ -11,8 +11,8 @@ window.onload = function() {
 	// Networking
 	//var dgram = require('dgram');
 	var io = require('socket.io-client');
-	//var socket = io.connect('https://romjam-liamattclarke.rhcloud.com:8443', {'forceNew':true});
-	var socket = io(); // local testing
+	var socket = io.connect('https://romjam-liamattclarke.rhcloud.com:8443', {'forceNew':true});
+	//var socket = io(); // local testing
 	
 	// Settings
 	var settings = {
@@ -20,7 +20,7 @@ window.onload = function() {
 		fieldOfView: 30,
 		defenderOrbitRadius: 8,
 		planetRadius: 1,
-		asteroidSpawnForce: 2,
+		asteroidSpawnForce: 4,
 		initialScreenHeight: 640,
 		planetMass: 1000000000,
 		asteroidMass: 100,
@@ -28,8 +28,8 @@ window.onload = function() {
 	};
 	
 	// Globals
-	var camera, renderer, currentScene, isHost, tanFOV, initialZoom, asteroidCounter, planet, atmosphere;
-	var GRAVITY_CONTSTANT = 0.00000000000667408;
+	var camera, renderer, currentScene, isHost, tanFOV, initialZoom, asteroidCounter, planet, atmosphere, musicTracks, asteroidSFX, collisionSFX;
+	var GRAVITY_CONTSTANT = 0.0000000000667408;
 	var scenes = {};
 	var deviceData = {};
 	var inGameAsteroids = {};
@@ -132,6 +132,7 @@ window.onload = function() {
 			var position = new Position(asteroid.position);
 			var asteroidObject = new AsteroidObject(asteroidName, position);
 			gameState.asteroids[ asteroidName ] = asteroidObject;
+			asteroidSFX[ Math.floor( Math.random() * asteroidSFX.length ) ].play();
 		}
 	};
 	var defender = {
@@ -139,8 +140,18 @@ window.onload = function() {
 		updateOrientation: function() {
 			applyOrientation(-settings.planetRadius);
 		},
-		fire: function() {
-			// fire projectile
+		fire: function(screenX, screenY) {
+			screenX = (screenX / window.innerWidth) * 2 - 1;
+			screenY = (screenY / window.innerWidth) * 2 + 1;
+			var raycaster = new THREE.Raycaster();
+			raycaster.setFromCamera(new THREE.Vector2(screenX, screenY), camera);
+			for(var asteroidName in inGameAsteroids) {
+				var target = ( raycaster.intersectObject( inGameAsteroids[ asteroidName ] ) )[0];
+				if(target) {
+					socket.emit('laser-fired', target.name);
+					return;
+				}
+			}
 		}
 	};
 	
@@ -157,6 +168,23 @@ window.onload = function() {
 		// init Renderer
 		renderer = new THREE.WebGLRenderer({antialias:true});
 		document.body.appendChild( renderer.domElement );
+		// Audio
+		var audioSrcPrefix = '../assets/audio/';
+		musicTracks = {
+			title: new Howl({urls: [audioSrcPrefix + 'title.mp3'], loop: true}),
+			game: new Howl({urls: [audioSrcPrefix + 'game.mp3'], loop: true})
+		};
+		asteroidSFX = [
+			new Howl({urls: [audioSrcPrefix + 'sfx_asteroid1.mp3']}),
+			new Howl({urls: [audioSrcPrefix + 'sfx_asteroid2.mp3']}),
+			new Howl({urls: [audioSrcPrefix + 'sfx_asteroid3.mp3']})
+		];
+		collisionSFX = [
+			new Howl({urls: [audioSrcPrefix + 'sfx_collision1.mp3']}),
+			new Howl({urls: [audioSrcPrefix + 'sfx_collision2.mp3']}),
+			new Howl({urls: [audioSrcPrefix + 'sfx_collision3.mp3']})
+		];
+	
 		// window resize event
 		window.addEventListener('resize', onResizeEvent, false);
 		onResizeEvent();
@@ -166,7 +194,6 @@ window.onload = function() {
 		}, false);
 		// initialize main menu
 		loadMeshes(initMenu);	
-
 	})();
 	
 	/*--------------------
@@ -191,7 +218,6 @@ window.onload = function() {
 
 	function loadMeshes(callback) {
 		var loader = new THREE.JSONLoader(); // init the loader util
-
 		var modelDir = 'assets/models/';
 		var textureDir = 'assets/textures/';
 
@@ -215,8 +241,7 @@ window.onload = function() {
 			planet.addEventListener('collision', function(obj) { // collision returns colliding object
 				destroyAsteroid( obj );
 				pulseSilhouette( 300 );
-				// playSound
-				// emit destroy event
+				collisionSFX[ Math.floor( Math.random() * collisionSFX.length ) ].play();
 			});	
 
 			loader.load(modelDir + 'asteroid.json', function (geometry) {
@@ -247,11 +272,10 @@ window.onload = function() {
 		var scale = 11.5;
 		asteroid.scale.set(scale, scale, scale);
 		currentScene.add( asteroid );
-
-		var sound = new Howl({
-		  urls: ['assets/audio/song.mp3']
-		}).play();
-
+		
+		musicTracks.game.stop();
+		musicTracks.title.play();
+		
 		// begin render vindaloop
 		update();
 	}
@@ -284,6 +308,8 @@ window.onload = function() {
 	-------------------*/
 	
 	function initGame() {
+		musicTracks.title.stop();
+		musicTracks.game.play();
 		asteroidCounter = 0;
 		// set GUI
 		setActivePanel('game');
@@ -293,6 +319,7 @@ window.onload = function() {
 			silhouette.style.display = 'none';
 			radar.style.display = 'none';
 			scenes.game = new Physijs.Scene();
+			scenes.game.setFixedTimeStep();
 			// init planet
 			scenes.game.add( planet );
 
@@ -320,6 +347,9 @@ window.onload = function() {
 			scenes.game.add(atmosphere);
 			// disable default gravity
 			scenes.game.setGravity( new THREE.Vector3(0,0,0) );
+			socket.on('laser-fired', function(target) {
+				destroyAsteroid( inGameAsteroids[ target ] )
+			});
 		} else {
 			document.title = "ROM JAM 2015 - Defender";
 			silhouette.style.display = 'block';
@@ -368,6 +398,7 @@ window.onload = function() {
 						var asteroidDist = asteroidPos.length();
 						var forceOfGrav = (GRAVITY_CONTSTANT * settings.asteroidMass * settings.planetMass) / (asteroidDist * asteroidDist);
 						asteroid.applyCentralForce( ((asteroidPos.normalize()).multiplyScalar( forceOfGrav )) );
+						asteroid.setDamping(0.2, 0);
 					}
 				})();
 				
