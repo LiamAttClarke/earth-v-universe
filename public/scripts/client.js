@@ -171,18 +171,18 @@ window.onload = function() {
 		// Audio
 		var audioSrcPrefix = '../assets/audio/';
 		musicTracks = {
-			title: new Howl({urls: [audioSrcPrefix + 'title.mp3'], loop: true}),
-			game: new Howl({urls: [audioSrcPrefix + 'game.mp3'], loop: true})
+			title: new Howl({urls: [audioSrcPrefix + 'title.ogg'], loop: true}),
+			game: new Howl({urls: [audioSrcPrefix + 'game.ogg'], loop: true})
 		};
 		asteroidSFX = [
-			new Howl({urls: [audioSrcPrefix + 'sfx_asteroid1.mp3']}),
-			new Howl({urls: [audioSrcPrefix + 'sfx_asteroid2.mp3']}),
-			new Howl({urls: [audioSrcPrefix + 'sfx_asteroid3.mp3']})
+			new Howl({urls: [audioSrcPrefix + 'sfx_asteroid1.ogg']}),
+			new Howl({urls: [audioSrcPrefix + 'sfx_asteroid2.ogg']}),
+			new Howl({urls: [audioSrcPrefix + 'sfx_asteroid3.ogg']})
 		];
 		collisionSFX = [
-			new Howl({urls: [audioSrcPrefix + 'sfx_collision1.mp3']}),
-			new Howl({urls: [audioSrcPrefix + 'sfx_collision2.mp3']}),
-			new Howl({urls: [audioSrcPrefix + 'sfx_collision3.mp3']})
+			new Howl({urls: [audioSrcPrefix + 'sfx_collision1.ogg']}),
+			new Howl({urls: [audioSrcPrefix + 'sfx_collision2.ogg']}),
+			new Howl({urls: [audioSrcPrefix + 'sfx_collision3.ogg']})
 		];
 	
 		// window resize event
