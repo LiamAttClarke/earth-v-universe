@@ -239,11 +239,18 @@ window.onload = function() {
 				texture2: { type: 't', 
 					value: THREE.ImageUtils.loadTexture( textureDir + 'planet.jpg' ) }
 				},				
-				shading: THREE.FlatShading,
+				shading: THREE.SmoothShading,
 				transparent: true,
 				vertexShader: AtmosphereShader.vertexShader,
 				fragmentShader: AtmosphereShader.fragmentShaderSolid
 			});
+			sphereMat.uniforms.texture1.value.wrapS = 
+			sphereMat.uniforms.texture1.value.wrapT = 
+			THREE.ClampToEdgeWrapping;
+
+			sphereMat.uniforms.texture2.value.wrapS = 
+			sphereMat.uniforms.texture2.value.wrapT = 
+			THREE.ClampToEdgeWrapping;
 
 			planet = new Physijs.SphereMesh(geometry, sphereMat, 0);//getMaterial(textureDir + 'planet.jpg'), 0);
 			planet.addEventListener('collision', function(obj) { // collision returns colliding object
@@ -349,6 +356,7 @@ window.onload = function() {
 				},
 				transparent: true,
 				side: THREE.DoubleSide,
+				shading: THREE.SmoothShading,
 				vertexShader: AtmosphereShader.vertexShader,
 				fragmentShader: AtmosphereShader.fragmentShaderTransparent
 			});
