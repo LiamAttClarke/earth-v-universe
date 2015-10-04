@@ -34,7 +34,7 @@ exports.fragmentShaderSolid =
     'varying vec3 n;' +
     'void main() {' +
     'vec3 r = normalize(reflect( e, n ));' +
-    'float m = 2. * sqrt( pow( r.x, 2. ) + pow( r.y, 2. ) + pow( r.z + 1., 2. ) );' +
+    'float m = clamp(2. * sqrt( pow( r.x, 2. ) + pow( r.y, 2. ) + pow( r.z + 1., 2. ) ), 0.0001, 0.9999);' +
     'vec2 vN = r.xy / m + .5;' +
     'vec3 base = texture2D( texture1, vN ).rgb;' +
     'vec3 color = texture2D( texture2, vUv ).rgb;' +
