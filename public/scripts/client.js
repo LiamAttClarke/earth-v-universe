@@ -11,8 +11,8 @@ window.onload = function() {
 	// Networking
 	//var dgram = require('dgram');
 	var io = require('socket.io-client');
-	var socket = io.connect('https://romjam-liamattclarke.rhcloud.com:8443', {'forceNew':true});
-	//var socket = io(); // local testing
+	//var socket = io.connect('https://romjam-liamattclarke.rhcloud.com:8443', {'forceNew':true});
+	var socket = io(); // local testing
 	
 	document.ontouchmove = function(event){
 		event.preventDefault();
@@ -30,7 +30,7 @@ window.onload = function() {
 	};
 	
 	// Globals
-	var camera, renderer, currentScene, isHost, tanFOV, initialZoom, asteroidCounter, planet, atmosphere, musicTracks, asteroidSFX, collisionSFX;
+	var camera, renderer, currentScene, isHost, tanFOV, initialZoom, asteroidCounter, planet, atmosphere, musicTracks, asteroidSFX, collisionSFX, laserSFX, laser;
 	var GRAVITY_CONTSTANT = 0.000000000001;
 	var scenes = {};
 	var deviceData = {};
@@ -53,7 +53,16 @@ window.onload = function() {
 	
 	// Prefab Objects
 	var prefabs = {
-		asteroid: {}
+		asteroid: {},
+		laserBeam: {
+			geometry: new THREE.BoxGeometry(0.1, 0.1, 0.1),
+			material: new THREE.MeshBasicMaterial({
+				color: 0xff0000,
+				shading: THREE.FlatShading,
+				transparent: true,
+				opacity: 0.66,
+			})
+		}
 	};
 	
 	// GUI
@@ -61,7 +70,9 @@ window.onload = function() {
 		load: document.getElementById('load-panel'),
 		menu: document.getElementById('menu-panel'),
 		wait: document.getElementById('wait-panel'),
-		game: document.getElementById('game-panel')
+		game: document.getElementById('game-panel'),
+		win: document.getElementById('win-panel'),
+		lose: document.getElementById('lose-panel'),
 	};
 	//var inputName = document.getElementById('name-input');
 	var playBtn = document.getElementById('play-btn');
@@ -112,7 +123,7 @@ window.onload = function() {
 	var attacker = {
 		mass: 100,
 		updateOrientation: function() {
-			applyOrientation(12);
+			applyOrientation(10);
 		},
 		// fire projectile
 		fire: function(screenX, screenY) {
@@ -144,14 +155,34 @@ window.onload = function() {
 			applyOrientation(-1);
 		},
 		fire: function(screenX, screenY) {
+			/*var fireDir = screen2WorldPoint(screenX, screenY).sub( camera.position ).normalize();
+			for(var asteroidName in inGameAsteroids) {
+				var asteroid = inGameAsteroids[ asteroidName ];
+				var camera2Asteroid = (new THREE.Vector3()).copy(asteroid.position);
+				camera2Asteroid.sub(camera.position);
+				camera2Asteroid.normalize();
+				var dot = fireDir.dot( camera2Asteroid );
+				if(dot >= 1 - 0.05) {
+					debug('hit');
+					//socket.emit('laser-fired', asteroidName);
+					return;
+				}
+			}*/
+			laserSFX[ Math.floor( Math.random() * laserSFX.length ) ].play();
 			screenX = (screenX / window.innerWidth) * 2 - 1;
-			screenY = (screenY / window.innerWidth) * 2 + 1;
+			screenY = -(screenY / window.innerHeight) * 2 + 1;
 			var raycaster = new THREE.Raycaster();
+			raycaster.precision = 0.0000001;
 			raycaster.setFromCamera(new THREE.Vector2(screenX, screenY), camera);
+
+			scenes.game.add( laser );
+			var pos = screen2WorldPoint(screenX, screenY);
+			var dir = pos.sub( camera.position ).normalize();
+			laser.setDirection( dir );
 			for(var asteroidName in inGameAsteroids) {
 				var target = ( raycaster.intersectObject( inGameAsteroids[ asteroidName ] ) )[0];
 				if(target) {
-					socket.emit('laser-fired', target.name);
+					socket.emit('laser-fired', {target: asteroidName});
 					return;
 				}
 			}
@@ -179,18 +210,23 @@ window.onload = function() {
 		// Audio
 		var audioSrcPrefix = '../assets/audio/';
 		musicTracks = {
-			title: new Howl({urls: [audioSrcPrefix + 'title.ogg'], loop: true}),
-			game: new Howl({urls: [audioSrcPrefix + 'game.ogg'], loop: true})
+			menu: new Howl({urls: [audioSrcPrefix + 'menu.ogg'], loop: true, buffer: true}),
+			game: new Howl({urls: [audioSrcPrefix + 'game.ogg'], loop: true, buffer: true})
 		};
 		asteroidSFX = [
-			new Howl({urls: [audioSrcPrefix + 'sfx_asteroid1.ogg']}),
-			new Howl({urls: [audioSrcPrefix + 'sfx_asteroid2.ogg']}),
-			new Howl({urls: [audioSrcPrefix + 'sfx_asteroid3.ogg']})
+			new Howl({urls: [audioSrcPrefix + 'sfx_asteroid1.ogg'], buffer: true}),
+			new Howl({urls: [audioSrcPrefix + 'sfx_asteroid2.ogg'], buffer: true}),
+			new Howl({urls: [audioSrcPrefix + 'sfx_asteroid3.ogg'], buffer: true})
 		];
 		collisionSFX = [
-			new Howl({urls: [audioSrcPrefix + 'sfx_collision1.ogg']}),
-			new Howl({urls: [audioSrcPrefix + 'sfx_collision2.ogg']}),
-			new Howl({urls: [audioSrcPrefix + 'sfx_collision3.ogg']})
+			new Howl({urls: [audioSrcPrefix + 'sfx_collision1.ogg'], buffer: true}),
+			new Howl({urls: [audioSrcPrefix + 'sfx_collision2.ogg'], buffer: true}),
+			new Howl({urls: [audioSrcPrefix + 'sfx_collision3.ogg'], buffer: true})
+		];
+		laserSFX = [
+			new Howl({urls: [audioSrcPrefix + 'sfx_laser1.ogg'], buffer: true}),
+			new Howl({urls: [audioSrcPrefix + 'sfx_laser2.ogg'], buffer: true}),
+			new Howl({urls: [audioSrcPrefix + 'sfx_laser3.ogg'], buffer: true})
 		];
 	
 		// window resize event
@@ -215,7 +251,7 @@ window.onload = function() {
 			colorAmbient: [0.48, 0.48, 0.48],
 			colorDiffuse: [0.48, 0.48, 0.48],
 			colorSpecular: [0.9, 0.9, 0.9],
-			shading: THREE.FlatShading 
+			shading: THREE.FlatShading,
 		};
 
 		if (textureBump) {
@@ -248,8 +284,9 @@ window.onload = function() {
 			planet = new Physijs.SphereMesh(geometry, sphereMat, 0);//getMaterial(textureDir + 'planet.jpg'), 0);
 			planet.addEventListener('collision', function(obj) { // collision returns colliding object
 				destroyAsteroid( obj );
-				pulseSilhouette( 300 );
-				defender.health--;
+				defender.health -= 20;
+				player.mass -= 10;
+				console.log('mass', player.mass);
 				console.log('health:', defender.health);
 				collisionSFX[ Math.floor( Math.random() * collisionSFX.length ) ].play();
 			});	
@@ -284,7 +321,7 @@ window.onload = function() {
 		currentScene.add( asteroid );
 		
 		musicTracks.game.stop();
-		musicTracks.title.play();
+		musicTracks.menu.play();
 		
 		// begin render vindaloop
 		update();
@@ -318,7 +355,7 @@ window.onload = function() {
 	-------------------*/
 	
 	function initGame() {
-		musicTracks.title.stop();
+		musicTracks.menu.stop();
 		musicTracks.game.play();
 		asteroidCounter = 0;
 		// set GUI
@@ -357,8 +394,8 @@ window.onload = function() {
 			scenes.game.add(atmosphere);
 			// disable default gravity
 			scenes.game.setGravity( new THREE.Vector3(0,0,0) );
-			socket.on('laser-fired', function(target) {
-				destroyAsteroid( inGameAsteroids[ target ] )
+			socket.on('laser-fired', function(data) {
+				destroyAsteroid( inGameAsteroids[ data.target ] )
 			});
 		} else {
 			document.title = "ROM JAM 2015 - Defender";
@@ -368,6 +405,16 @@ window.onload = function() {
 			socket.on("simulation-frame", function(data) {
 				gameState = data;
 			});
+			socket.on('defender-win', function() {
+				currentScene = scenes.menu;
+				setActivePanel('win');
+			});
+			socket.on('defender-lose', function() {
+				currentScene = scenes.menu;
+				setActivePanel('lose');
+			});
+			laser = new THREE.ArrowHelper(new THREE.Vector3(0,0,-1), new THREE.Vector3(), 256, 0xff0000 );
+			
 		}
 		// set current scene
 		currentScene = scenes.game;
@@ -381,11 +428,8 @@ window.onload = function() {
 		}, false);
 		window.addEventListener('touchstart', function(event) {
 			event.preventDefault();
-			var touch = event.touches[0];
-			player.mass--;
-			console.log('mass', player.mass);		
+			var touch = event.touches[0];		
 			player.fire(touch.screenX, touch.screenY);
-
 		}, false);
 	}
 	
@@ -399,6 +443,23 @@ window.onload = function() {
 		// simulate physics
 		if(currentScene === scenes.game) {
 			if(isHost) {
+				if(defender.health <= 0) {
+					socket.emit('defender-lose');
+					currentScene = scenes.menu;
+					if(player === defender) {
+						setActivePanel('lose');
+					} else {
+						setActivePanel('win');
+					}
+				} else if(attacker.mass <= 0) {
+					socket.emit('defender-win');
+					currentScene = scenes.menu;
+					if(player === defender) {
+						setActivePanel('win');
+					} else {
+						setActivePanel('lose');
+					}
+				}
 				(function() {
 					for(var inGameAsteroidName in inGameAsteroids) {
 						// update gameState
@@ -427,8 +488,11 @@ window.onload = function() {
 						if(gameStateAsteroid === null) {
 							scenes.game.remove( inGameAsteroids[ gameStateAsteroidName ] );
 							
-							if (radarArrows[ gameStateAsteroidName ]) 
+							if (radarArrows[ gameStateAsteroidName ]) {
 								radar.removeChild( radarArrows[ gameStateAsteroidName ] );
+								collisionSFX[ Math.floor( Math.random() * collisionSFX.length ) ].play();
+								pulseSilhouette( 300 );
+							}
 
 							delete inGameAsteroids[ gameStateAsteroidName ];
 							delete gameState.asteroids[ gameStateAsteroidName ];
@@ -528,7 +592,11 @@ window.onload = function() {
 		} else {
 			rotation = 270 - rotation;
 		}
-		arrowElem.style.transform = 'rotate(' + rotation + 'deg)';
+		var transform = 'rotate(' + rotation + 'deg)';
+		arrowElem.style.transform = transform;
+		arrowElem.style.webkitTransform = transform;
+		arrowElem.style.mozTransform = transform;
+		arrowElem.style.oTransform = transform;
 	}
 	
 	function createArrow(arrowName) {

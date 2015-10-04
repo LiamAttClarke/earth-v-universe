@@ -35,7 +35,7 @@ canvas {
 #menu-panel {
 	display: none;
 }
-#menu {
+.scaled {
 	position: absolute;
 	top: 50%;
 	left: 50%;
@@ -186,4 +186,15 @@ canvas {
 	top: 0;
 	left: 0;
 	font-size: 2em;
+}
+#win-panel {
+	display: none;
+	background-color: #ffffff;
+}
+#lose-panel {
+	display: none;
+	background-color: #ffffff;
+}
+.img {
+	width: 100%;
 }
