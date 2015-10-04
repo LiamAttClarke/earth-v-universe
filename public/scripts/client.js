@@ -14,6 +14,10 @@ window.onload = function() {
 	var socket = io.connect('https://romjam-liamattclarke.rhcloud.com:8443', {'forceNew':true});
 	//var socket = io(); // local testing
 	
+	document.ontouchmove = function(event){
+		event.preventDefault();
+	};
+
 	// Settings
 	var settings = {
 		frameRate: 60,
