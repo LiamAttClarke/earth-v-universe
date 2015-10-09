@@ -203,21 +203,21 @@ window.onload = function() {
 		};
 		asteroidSFX = [
 			new Howl({urls: [audioSrcPrefix + 'sfx_asteroid1.mp3'], buffer: true}),
-			/*new Howl({urls: [audioSrcPrefix + 'sfx_asteroid2.mp3'], buffer: true}),
+			new Howl({urls: [audioSrcPrefix + 'sfx_asteroid2.mp3'], buffer: true}),
 			new Howl({urls: [audioSrcPrefix + 'sfx_asteroid3.mp3'], buffer: true}),
-			new Howl({urls: [audioSrcPrefix + 'sfx_asteroid4.mp3'], buffer: true})*/
+			new Howl({urls: [audioSrcPrefix + 'sfx_asteroid4.mp3'], buffer: true})
 		];
 		collisionSFX = [
 			new Howl({urls: [audioSrcPrefix + 'sfx_collision1.mp3'], buffer: true}),
-			/*new Howl({urls: [audioSrcPrefix + 'sfx_collision2.mp3'], buffer: true}),
+			new Howl({urls: [audioSrcPrefix + 'sfx_collision2.mp3'], buffer: true}),
 			new Howl({urls: [audioSrcPrefix + 'sfx_collision3.mp3'], buffer: true}),
-			new Howl({urls: [audioSrcPrefix + 'sfx_collision4.mp3'], buffer: true})*/
+			new Howl({urls: [audioSrcPrefix + 'sfx_collision4.mp3'], buffer: true})
 		];
 		laserSFX = [
 			new Howl({urls: [audioSrcPrefix + 'sfx_laser1.mp3'], buffer: true}),
-			/*new Howl({urls: [audioSrcPrefix + 'sfx_laser2.mp3'], buffer: true}),
+			new Howl({urls: [audioSrcPrefix + 'sfx_laser2.mp3'], buffer: true}),
 			new Howl({urls: [audioSrcPrefix + 'sfx_laser3.mp3'], buffer: true}),
-			new Howl({urls: [audioSrcPrefix + 'sfx_laser4.mp3'], buffer: true})*/
+			new Howl({urls: [audioSrcPrefix + 'sfx_laser4.mp3'], buffer: true})
 		];
 	
 		// window resize event
@@ -283,11 +283,12 @@ window.onload = function() {
 			planet = new Physijs.SphereMesh(geometry, getMaterial(textureDir + 'planet.jpg'), 0);
 			planet.addEventListener('collision', function(obj) { // collision returns colliding object
 				destroyAsteroid( obj );
-				defender.health -= 20;
-				player.mass -= 10;
+				defender.health -= 10;
+				player.mass -= 15;
 				console.log('mass', player.mass);
 				console.log('health:', defender.health);
 				collisionSFX[ Math.floor( Math.random() * collisionSFX.length ) ].play();
+				socket.emit('collision');
 			});	
 
 			loader.load(modelDir + 'asteroid.json', function (geometry) {
@@ -321,7 +322,6 @@ window.onload = function() {
 		
 		musicTracks.game.stop();
 		musicTracks.menu.play();
-		musicTracks.menu.unmute();
 		
 		// begin render vindaloop
 		update();
@@ -357,7 +357,6 @@ window.onload = function() {
 	function initGame() {
 		musicTracks.menu.stop();
 		musicTracks.game.play();
-		musicTracks.game.unmute();
 		asteroidCounter = 0;
 		// set GUI
 		setActivePanel('game');
@@ -406,6 +405,9 @@ window.onload = function() {
 			silhouette.style.display = 'block';
 			radar.style.display = 'inline';
 			scenes.game = new THREE.Scene();
+			socket.on('collision', function() {
+				pulseSilhouette( 300 )
+			});
 			socket.on("simulation-frame", function(data) {
 				gameState = data;
 			});
@@ -495,7 +497,6 @@ window.onload = function() {
 							if (radarArrows[ gameStateAsteroidName ]) {
 								radar.removeChild( radarArrows[ gameStateAsteroidName ] );
 								collisionSFX[ Math.floor( Math.random() * collisionSFX.length ) ].play();
-								pulseSilhouette( 300 );
 							}
 
 							delete inGameAsteroids[ gameStateAsteroidName ];

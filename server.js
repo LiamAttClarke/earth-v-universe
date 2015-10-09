@@ -59,6 +59,9 @@ io.sockets.on('connection', function(socket) {
 		socket.on('defender-lose', function() {
 			socket.broadcast.to(room.name).emit('defender-lose');
 		});
+		socket.on('collision', function() {
+			socket.broadcast.to(room.name).emit('collision');
+		});
 		// connection lost event
 		socket.on('disconnect', function() {
 			console.log(socket.id + ' - connection lost');

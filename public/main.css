@@ -201,3 +201,6 @@ canvas {
 .img {
 	width: 100%;
 }
+.no-show {
+	display: none;
+}
