@@ -148,6 +148,7 @@ window.onload = function() {
 			var position = new Position(asteroid.position);
 			var asteroidObject = new AsteroidObject(asteroidName, position);
 			gameState.asteroids[ asteroidName ] = asteroidObject;
+			asteroidSounds[Math.floor(Math.random() * asteroidSounds.length)].play();
 		}
 	};
 	var defender = {
@@ -174,6 +175,7 @@ window.onload = function() {
 					return;
 				}
 			}
+			laserSounds[Math.floor(Math.random() * laserSounds.length)].play();
 		}
 	};
 	var lobbyPlayer = {
@@ -287,6 +289,7 @@ window.onload = function() {
 				console.log('mass', player.mass);
 				console.log('health:', defender.health);
 				socket.emit('collision');
+				collisionSounds[Math.floor(Math.random() * collisionSounds.length)].play();
 			});	
 
 			loader.load(modelDir + 'asteroid.json', function (geometry) {
@@ -393,7 +396,8 @@ window.onload = function() {
 			// disable default gravity
 			scenes.game.setGravity( new THREE.Vector3(0,0,0) );
 			socket.on('laser-fired', function(data) {
-				destroyAsteroid( inGameAsteroids[ data.target ] )
+				destroyAsteroid( inGameAsteroids[ data.target ] );
+				laserSounds[Math.floor(Math.random() * laserSounds.length)].play();
 			});
 		} else {
 			document.title = "ROM JAM 2015 - Defender";
@@ -401,7 +405,8 @@ window.onload = function() {
 			radar.style.display = 'inline';
 			scenes.game = new THREE.Scene();
 			socket.on('collision', function() {
-				pulseSilhouette( 300 )
+				pulseSilhouette( 300 );
+				collisionSounds[Math.floor(Math.random() * collisionSounds.length)].play();
 			});
 			socket.on("simulation-frame", function(data) {
 				gameState = data;
