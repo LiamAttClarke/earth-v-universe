@@ -1,4 +1,4 @@
-# Game Jam: ROMAGEDDON
+# GameJam: ROMAGEDDON
 A 2-player online multiplayer game that uses device orientation for player control. Developed for ROMJam 2015 (Royal Ontario Museum's Game Jam).
 
 ## Credits:
